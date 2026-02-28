@@ -5,6 +5,50 @@
     }
   ],
   "settings": {
-    "latex-workshop.latex.recipe.default": "latexmk (xelatex)"
+    "latex-workshop.latex.tools": [
+      {
+        "name": "cv-yaml-build",
+        "command": ".venv/bin/python",
+        "args": [
+          "build_cv.py",
+          "--input",
+          "cv.yaml",
+          "--output",
+          "cv.generated.tex"
+        ]
+      },
+      {
+        "name": "latexmk-lualatex",
+        "command": "latexmk",
+        "args": [
+          "-lualatex",
+          "-synctex=1",
+          "-interaction=nonstopmode",
+          "-file-line-error",
+          "-halt-on-error",
+          "%DOC%"
+        ]
+      }
+    ],
+    "latex-workshop.latex.recipes": [
+      {
+        "name": "CV (YAML → TeX → LuaLaTeX)",
+        "tools": [
+          "cv-yaml-build",
+          "latexmk-lualatex"
+        ]
+      }
+    ],
+    "latex-workshop.latex.recipe.default": "CV (YAML → TeX → LuaLaTeX)",
+    "latex-workshop.latex.autoBuild.run": "onSave",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "code-runner.runInTerminal": true,
+    "code-runner.executorMap": {
+      "python": ".venv/bin/python -u"
+    },
+    "code-runner.executorMapByFileExtension": {
+      ".tex": ".venv/bin/python build_cv.py --input cv.yaml --output cv.generated.tex && latexmk -lualatex -synctex=1 -interaction=nonstopmode -file-line-error -halt-on-error main.tex"
+    }
   }
 }

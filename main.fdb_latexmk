@@ -1,11 +1,10 @@
 # Fdb version 4
-["xdvipdfmx"] 1770550435.54191 "main.xdv" "main.pdf" "main" 1770550436.28974 0
-  "main.xdv" 1770550435.47743 28804 c20be0f6f23f0c4cab1af6f02d84592d "xelatex"
+["xdvipdfmx"] 1772292068.40075 "main.xdv" "main.pdf" "main" 1772292068.95179 0
+  "main.xdv" 1772292068.31578 29872 badb3510ea7c7129de2fd64e90728b49 "xelatex"
   (generated)
   "main.pdf"
   (rewritten before read)
-["xelatex"] 1770550433.31669 "/Users/steph/Code/CV_Latex modern canva/main.tex" "main.xdv" "main" 1770550436.28689 0
-  "/Users/steph/Code/CV_Latex modern canva/main.tex" 1770550433.08778 8281 ed2dcf32bbe8062c212c721d858e853b ""
+["xelatex"] 1772292066.04509 "main.tex" "main.xdv" "main" 1772292068.94949 0
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmmi10.tfm" 1136768653 1528 abec98dbc43e172678c11b3b9031252a ""
@@ -155,9 +154,10 @@
   "/usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf" 1739380943 42148 61becc7c670cd061bb319c643c27fdd4 ""
   "/usr/local/texlive/2025/texmf-var/web2c/xetex/xelatex.fmt" 1769191658 5639807 aee0f6e9223ac7ef16a393d12977c748 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "main.aux" 1770550435.47607 275 7169fd6829e14d8f0f4bc486e8c03d60 "xelatex"
-  "main.out" 1770550435.31709 0 d41d8cd98f00b204e9800998ecf8427e "xelatex"
-  "main.tex" 1770550433.08778 8281 ed2dcf32bbe8062c212c721d858e853b ""
+  "cv.generated.tex" 1772291910.20451 4281 febbcee41e91f560b722606781df1ca2 ""
+  "main.aux" 1772292068.31382 275 7169fd6829e14d8f0f4bc486e8c03d60 "xelatex"
+  "main.out" 1772292068.13788 0 d41d8cd98f00b204e9800998ecf8427e "xelatex"
+  "main.tex" 1772292063.07078 10339 0158454a24862a1399c46a7ea77e91bb ""
   "photo.jpg" 1769185104 44449 b186de560ab63a2a7ccaa22929690365 ""
   (generated)
   "main.aux"

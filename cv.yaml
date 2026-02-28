@@ -1,0 +1,120 @@
+layout:
+  sidebar_width: "0.367\\paperwidth"
+  pad: "12mm"
+  main_gap: "20mm"
+  content_top_offset: "72mm"
+  contact_block_top_shift: "-6mm"
+  header_bar:
+    left_overlap: "48mm"
+    top_shift: "-20mm"
+    bottom_shift: "-58mm"
+
+header:
+  name: "STÉPHANE MANET"
+  title: "Data scientist / Machine learning"
+  name_font_size: 28
+  letter_space: 8
+  name_title_gap: "1.5mm"
+
+photo:
+  path: "photo.jpg"
+  width: "48mm"
+  radius: "23mm"
+  x_from_pad: "27mm"
+  y_shift: "-39mm"
+  border_width: "2.5pt"
+
+contacts:
+  left:
+    - icon: phone
+      value: "+33 6 86 14 49 52"
+    - icon: envelope
+      value: "stephane@manet-conseil.fr"
+  right:
+    - icon: globe
+      value: "www.manet-conseil.fr"
+    - icon: map-marker
+      value_lines:
+        - "10, rue Alsace-Lorraine"
+        - "34200 Sète"
+
+sidebar:
+  about:
+    heading: "À propos"
+    paragraphs:
+      - "J’ai longtemps aidé des organisations à se transformer en mettant de l’ordre dans le besoin, les indicateurs et la décision. Puis j’ai eu envie d’aller plus loin : construire avec la donnée des solutions qui anticipent et s’industrialisent. C’est ce virage qui m’a mené au Master Data Scientist."
+  formations:
+    heading: "Formations"
+    entries:
+      - diploma: "Master Data Scientist / Machine Learning"
+        institution: "Openclassrooms"
+        dates: "2025 -- 2026"
+      - diploma: "Master Européen de Recherche en Formation des Adultes"
+        institution: "Le Conservatoire National des Arts et Métiers"
+        dates: "2018 -- 2019"
+  certifications:
+    heading: "Certifications"
+    entries:
+      - diploma: "Consultant Indépendant Certifié"
+        institution: "Akto"
+        dates: "2025" 
+      - diploma: "Certificat e-marketing et e-commerce"
+        institution: "Le Conservatoire National des Arts et Métiers"
+        dates: "2024"
+  skills:
+    heading: "Compétences"
+    items:
+      - "Apprentissage machine"
+      - "Analyse de données"
+      - "Déploiement MLOps"
+      - "NLP / GenAI"
+      - "Gestion de projet"
+      - "Ingénierie pédagogique"
+  languages:
+    heading: "Langues"
+    items:
+      - "Français (langue marternelle)"
+      - "Anglais (B2)"
+      - "Notions d’Ukrainien"
+
+main:
+  experiences:
+    heading: "Expérience"
+    entries:
+      - role: "Consultant freelance"
+        organization: "Paradoxes Conseil, Groupe Bizness"
+        description: "Accompagnement d’entreprises et d’organismes de formation dans des projets de transformation digitale."
+        dates: "2021 -- 2026"
+      - role: "Formateur freelance"
+        organization: "Valuego, Creactifs, Esicad, UNREP"
+        description: "Conception et déploiement de dispositifs de formation (présentiel, distanciel, hybride) et animation de sessions."
+        dates: "2019 -- 2026"
+      - role: "Ingénieur pédagogique, cat. A"
+        organization: "Ville de Paris"
+        description: "Conduite de projets à grande échelle, accompagnement d’équipes, structuration de dispositifs et pilotage via indicateurs."
+        dates: "2019 -- 2020"
+      - role: "Formateur numérique"
+        organization: "Espace Public Numérique du Relais 59"
+        description: "Management d’équipe, animation de partenaires, vulgarisation et pédagogie."
+        dates: "2016 -- 2017"
+  digital:
+    heading: "Numérique"
+    categories:
+      - label: "Sciences des données"
+        values:
+          latex: "Python, SQL, Julia, Tableau, Power~BI"
+      - label: "Apprentissage machine"
+        values: "Scikit-Learn, PyTorch, TensorFlow"
+      - label: "MLOps"
+        values:
+          latex: "GitHub, Docker, MLflow, Hugging~Face, Streamlit"
+      - label: "Web / CMS"
+        values: "HTML, CSS, WordPress, Django et Wagtail, Grav"
+      - label: "Automatisation / No-code"
+        values: "n8n, Airtable"
+      - label: "Création de contenu"
+        values:
+          latex: "Photoshop, InDesign, Audition, OBS, Final~Cut~Pro"
+      - label: "Bureautique"
+        values:
+          latex: "Office~365, Google~Workspace, Notion et \\LaTeX{} pour générer ce CV"

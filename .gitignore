@@ -1,0 +1,6 @@
+# Latex build files
+main*
+.texlive-cache/
+
+# Python virtual environment
+.venv/

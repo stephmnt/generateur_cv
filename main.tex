@@ -1,11 +1,10 @@
-% !TeX program = xelatex
+% !TeX program = lualatex
 \documentclass[11pt]{article}
-\newcommand{\HeaderSpace}{\ifwithheader\vspace*{72mm}\fi}
 
 % --- Page & fonts ---
 \usepackage[a4paper,left=0mm,right=0mm,top=0mm,bottom=0mm]{geometry}
 \usepackage{fontspec}
-%	\setmainfont{TeX Gyre Heros}
+% \setmainfont{TeX Gyre Heros}
 
 \usepackage[french]{babel}
 \usepackage{microtype}
@@ -31,15 +30,130 @@
 \definecolor{Muted}{HTML}{6B6E76}
 \definecolor{Rule}{HTML}{B8BAC0}
 
+% --- Data defaults (overridden by cv.generated.tex) ---
+\newcommand{\CVSidebarWidthValue}{0.367\paperwidth}
+\newcommand{\CVPadValue}{12mm}
+\newcommand{\CVMainGapValue}{20mm}
+\newcommand{\CVContentTopOffset}{72mm}
+\newcommand{\CVContactBlockTopShift}{-6mm}
+
+\newcommand{\CVHeaderBarLeftOverlap}{48mm}
+\newcommand{\CVHeaderBarTopShift}{-20mm}
+\newcommand{\CVHeaderBarBottomShift}{-58mm}
+
+\newcommand{\CVPhotoPath}{photo.jpg}
+\newcommand{\CVPhotoWidth}{48mm}
+\newcommand{\CVPhotoRadius}{23mm}
+\newcommand{\CVPhotoXFromPad}{27mm}
+\newcommand{\CVPhotoYShift}{-39mm}
+\newcommand{\CVPhotoBorderWidth}{2.5pt}
+
+\newcommand{\CVHeaderName}{STÉPHANE MANET}
+\newcommand{\CVHeaderTitle}{Data scientist / Machine learning}
+\newcommand{\CVHeaderNameSize}{28}
+\newcommand{\CVHeaderNameLetterSpace}{8}
+\newcommand{\CVHeaderNameTitleGap}{1.5mm}
+
+\newcommand{\CVSidebarAboutHeading}{À propos}
+\newcommand{\CVSidebarAboutBody}{%
+J'ai longtemps aidé des organisations à se transformer en mettant de l'ordre dans le besoin,
+les indicateurs et la décision. Puis j'ai eu envie d'aller plus loin : construire avec la donnée
+des solutions qui anticipent et s'industrialisent. C'est ce virage qui m'a mené au Master Data Scientist.\par
+}
+
+\newcommand{\CVSidebarFormationsHeading}{Formations}
+\newcommand{\CVSidebarFormationsBody}{%
+\textbf{Master Data Scientist / Machine Learning}\par
+Openclassrooms\hfill 2025 -- 2026\par\vspace{2mm}
+\textbf{Master Européen de Recherche en Formation des Adultes}\par
+Le Conservatoire National des Arts et Métiers\hfill 2018 -- 2019\par
+}
+
+\newcommand{\CVSidebarCertificationsHeading}{Certifications}
+\newcommand{\CVSidebarCertificationsBody}{%
+\textbf{Consultant Indépendant Certifié}\par
+Akto\hfill 2025\par\vspace{2mm}
+\textbf{Certificat e-marketing et e-commerce}\par
+Le Conservatoire National des Arts et Métiers\hfill 2024\par
+}
+
+\newcommand{\CVSidebarSkillsHeading}{Compétences}
+\newcommand{\CVSidebarSkillsItems}{%
+\item Apprentissage machine
+\item Analyse de données
+\item Déploiement MLOps
+\item NLP / GenAI
+\item Gestion de projet
+\item Ingénierie pédagogique
+}
+
+\newcommand{\CVSidebarLanguagesHeading}{Langues}
+\newcommand{\CVSidebarLanguagesItems}{%
+\item Français
+\item Anglais
+\item Notions d'Ukrainien
+}
+
+\newcommand{\CVContactLeftBlock}{%
+\contactitem{\faPhone*}{\small +33 6 86 14 49 52}
+\contactitem{\faEnvelope}{\small stephane@manet-conseil.fr}
+}
+
+\newcommand{\CVContactRightBlock}{%
+\contactitem{\faGlobe}{\small www.manet-conseil.fr}
+\contactitem{\faMapMarker*}{\small 10, rue Alsace-Lorraine\newline\small 34200 Sète}
+}
+
+\newcommand{\CVExperienceHeading}{Expérience}
+\newcommand{\CVExperiencesBody}{%
+\job
+  {Consultant freelance}
+  {Paradoxes Conseil, Groupe Bizness}
+  {Accompagnement d'entreprises et d'organismes de formation dans des projets de transformation digitale.}
+  {2021 -- 2026}
+\job
+  {Formateur freelance}
+  {Valuego, Esicad, UNREP}
+  {Conception et déploiement de dispositifs de formation (présentiel, distanciel, hybride) et animation de sessions.}
+  {2019 -- 2026}
+\job
+  {Ingénieur pédagogique, cat. A}
+  {Ville de Paris}
+  {Conduite de projets à grande échelle, accompagnement d'équipes, structuration de dispositifs et pilotage via indicateurs.}
+  {2019 -- 2020}
+\job
+  {Formateur numérique}
+  {Espace Public Numérique du Relais 59}
+  {Management d'équipe, animation de partenaires, vulgarisation et pédagogie.}
+  {2016 -- 2017}
+}
+
+\newcommand{\CVDigitalHeading}{Numérique}
+\newcommand{\CVDigitalBody}{%
+\textbf{Sciences des données :} Python, SQL, Julia, Poetry, Tableau, Power BI\par
+\textbf{Apprentissage machine :} Scikit-Learn, PyTorch, TensorFlow\par
+\textbf{MLOps :} GitHub, Docker, MLflow, Hugging Face, Streamlit\par
+\textbf{Web / CMS :} HTML, CSS, WordPress, Django et Wagtail, Grav\par
+\textbf{Automatisation / No-code :} n8n, Airtable\par
+\textbf{Création de contenu :} Photoshop, InDesign, Audition, OBS, Final Cut Pro\par
+\textbf{Bureautique :} Office 365, Google Workspace, Notion et \LaTeX{} pour générer ce CV\par
+}
+
+\InputIfFileExists{cv.generated.tex}{}{% 
+  \typeout{WARNING: cv.generated.tex introuvable, valeurs par defaut utilisees.}%
+}
+
+\newcommand{\HeaderSpace}{\ifwithheader\vspace*{\CVContentTopOffset}\fi}
+
 % --- Layout constants ---
 \newlength{\SidebarW}
-\setlength{\SidebarW}{0.367\paperwidth} % largeur sidebar (ajuste si besoin)
+\setlength{\SidebarW}{\CVSidebarWidthValue}
 
 \newlength{\Pad}
-\setlength{\Pad}{12mm} % padding interne
+\setlength{\Pad}{\CVPadValue}
 
 \newlength{\MainGap}
-\setlength{\MainGap}{20mm} % espace entre sidebar et contenu principal
+\setlength{\MainGap}{\CVMainGapValue}
 
 % --- Header on/off switch ---
 \newif\ifwithheader
@@ -64,8 +178,8 @@
       % Header + photo + titres (seulement si header actif)
       \ifwithheader
         % Header bar (plus chevauchant la sidebar)
-        \coordinate (barleft)  at ([xshift=\SidebarW-48mm,yshift=-20mm]current page.north west);
-        \coordinate (barright) at ([yshift=-58mm]current page.north east);
+        \coordinate (barleft) at ([xshift=\dimexpr\SidebarW-\CVHeaderBarLeftOverlap\relax,yshift=\CVHeaderBarTopShift]current page.north west);
+        \coordinate (barright) at ([yshift=\CVHeaderBarBottomShift]current page.north east);
         \fill[HeaderBG] (barleft) rectangle (barright);
 
         % Centre horizontal de la zone blanche (sans sidebar)
@@ -74,26 +188,25 @@
         \coordinate (barcenter) at (whitecenter |- barverticalcenter);
 
         % Photo (plus grande, à cheval)
-        \coordinate (photoc) at ([xshift=\Pad+27mm,yshift=-39mm]current page.north west);
-        \def\photor{23mm}
+        \coordinate (photoc) at ([xshift=\dimexpr\Pad+\CVPhotoXFromPad\relax,yshift=\CVPhotoYShift]current page.north west);
+        \def\photor{\CVPhotoRadius}
 
         \begin{scope}
           \clip (photoc) circle (\photor);
-          \node at (photoc) {\includegraphics[width=48mm]{photo.jpg}};
+          \node at (photoc) {\includegraphics[width=\CVPhotoWidth]{\CVPhotoPath}};
         \end{scope}
-        \draw[white,line width=2.5pt] (photoc) circle (\photor);
+        \draw[white,line width=\CVPhotoBorderWidth] (photoc) circle (\photor);
 
         % Name + title
         \node[anchor=center, align=center] at (barcenter) {%
-  {\color{white}\bfseries\fontsize{28}{28}\selectfont
-   \addfontfeatures{LetterSpace=8} STÉPHANE MANET}\\[1.5mm]
-  {\color{white!75}\large Data scientist / Machine learning}%
+  {\color{white}\bfseries\fontsize{\CVHeaderNameSize}{\CVHeaderNameSize}\selectfont
+   \addfontfeatures{LetterSpace=\CVHeaderNameLetterSpace} \CVHeaderName}\\[\CVHeaderNameTitleGap]
+  {\color{white!75}\large \CVHeaderTitle}%
 };
       \fi
     \end{tikzpicture}
   \fi
 }
-
 
 % --- Typographic helpers ---
 \setlength{\parindent}{0pt}
@@ -102,21 +215,18 @@
 \newcommand{\sideheading}[1]{%
   \vspace{5mm}%
   {\color{TextDark}\bfseries\large\MakeUppercase{#1}}\par
-  \vspace{1.5mm}\color{Rule}\rule{\linewidth}{0.4pt}\color{TextDark}\par
   \vspace{2mm}%
 }
 
 \newcommand{\sideheadingfirst}[1]{%
   {\color{TextDark}\bfseries\large\MakeUppercase{#1}}\par
-  \vspace{1.5mm}\color{Rule}\rule{\linewidth}{0.4pt}\color{TextDark}\par
   \vspace{2mm}%
 }
 
 \newcommand{\cvsection}[1]{%
   \vspace{2mm}%
-  \noindent{\color{TextDark}\bfseries\Large\MakeUppercase{#1}}%
-  \hspace{6mm}{\color{Rule}\rule{\dimexpr\linewidth-40mm\relax}{0.4pt}}%
-  \par\vspace{3mm}%
+  \noindent{\color{TextDark}\bfseries\Large\MakeUppercase{#1}}\par
+  \vspace{3mm}%
 }
 
 \newcommand{\contactitem}[2]{%
@@ -126,12 +236,12 @@
 }
 
 \newcommand{\job}[4]{% role, org, desc, dates
-  \begin{tabularx}{\linewidth}{@{}p{5mm}Xr@{}}
+  \begin{tabularx}{\linewidth}{@{}p{5mm}X>{\raggedleft\arraybackslash}p{28mm}@{}}
     {\color{Muted}\large$\circ$} &
-    {\color{TextDark}\textbf{#1}}\par
+    {\vspace{0pt}\color{TextDark}\textbf{#1}}\par
     {\color{Muted}\textit{#2}}\par
     {\color{TextDark}\small #3}
-    & {\color{Muted}\small #4}
+    & {\vspace{0pt}\color{Muted}\small #4}
   \end{tabularx}
   \vspace{4mm}
 }
@@ -153,112 +263,72 @@
   \thispagestyle{empty}
 }
 
-
 \begin{document}
 \thispagestyle{empty}
 
 % Push content below the header/photo overlay
 \ifwithheader
-  \vspace*{72mm}
+  \vspace*{\CVContentTopOffset}
 \else
   \vspace*{0mm}
 \fi
-
 
 % --- Two-column content area (manual) ---
 \noindent
 \hspace*{\Pad}%
 \begin{minipage}[t]{\dimexpr\SidebarW-2\Pad\relax}
   % ===== SIDEBAR =====
-  \sideheadingfirst{À propos}
+  \sideheadingfirst{\CVSidebarAboutHeading}
   {\small
-  J’ai longtemps aidé des organisations à se transformer en mettant de l’ordre dans le besoin,
-  les indicateurs et la décision. Puis j’ai eu envie d’aller plus loin : construire avec la donnée
-  des solutions qui anticipent et s’industrialisent. C’est ce virage qui m’a mené au Master Data Scientist.
-  \par}
-
-  \sideheading{Formations}
-  {\small
-  \textbf{Master Data Scientist / Machine Learning}\par
-  Openclassrooms\hfill 2025 -- 2026\par\vspace{2mm}
-
-  \textbf{Master Européen de Recherche en Formation des Adultes}\par
-  Le Conservatoire National des Arts et Métiers\hfill 2018 -- 2019\par
+  \CVSidebarAboutBody
   }
 
-  \sideheading{Compétences}
+  \sideheading{\CVSidebarFormationsHeading}
+  {\small
+  \CVSidebarFormationsBody
+  }
+
+  \sideheading{\CVSidebarCertificationsHeading}
+  {\small
+  \CVSidebarCertificationsBody
+  }
+
+  \sideheading{\CVSidebarSkillsHeading}
   {\small
   \begin{itemize}[leftmargin=4mm,itemsep=1.2mm,topsep=0mm]
-    \item Apprentissage machine
-    \item Analyse de données
-    \item Déploiement MLOps
-    \item NLP / GenAI
-    \item Gestion de projet
-    \item Ingénierie pédagogique
+    \CVSidebarSkillsItems
   \end{itemize}
   }
 
-  \sideheading{Langues}
+  \sideheading{\CVSidebarLanguagesHeading}
   {\small
   \begin{itemize}[leftmargin=4mm,itemsep=1.2mm,topsep=0mm]
-    \item Français
-    \item Anglais
-    \item Notions d’Ukrainien
+    \CVSidebarLanguagesItems
   \end{itemize}
   }
 \end{minipage}%
 \hspace*{\MainGap}%
-\begin{minipage}[t]{\dimexpr\paperwidth-\SidebarW+\Pad-2\MainGap\relax}
+\begin{minipage}[t]{\dimexpr\paperwidth-\SidebarW-\MainGap\relax}
   % ===== MAIN COLUMN =====
 
   % Contact block (under header bar)
-  \vspace*{-6mm}
+  \vspace*{\CVContactBlockTopShift}
   \begin{minipage}[t]{0.48\linewidth}
-    \contactitem{\faPhone*}{\small +33 6 86 14 49 52}
-    \contactitem{\faEnvelope}{\small stephane@manet-conseil.fr}
+    \CVContactLeftBlock
   \end{minipage}\hfill
   \begin{minipage}[t]{0.48\linewidth}
-    \contactitem{\faGlobe}{\small www.manet-conseil.fr}
-    \contactitem{\faMapMarker*}{\small 10, rue Alsace-Lorraine\newline\small 34200 Sète}
+    \CVContactRightBlock
   \end{minipage}
 
   \vspace{4mm}
-  \cvsection{Expérience}
+  \cvsection{\CVExperienceHeading}
 
-  \job
-    {Consultant freelance}
-    {Paradoxes Conseil, Groupe Bizness}
-    {Accompagnement d’entreprises et d’organismes de formation dans des projets de transformation digitale.}
-    {2021 -- 2026}
+  \CVExperiencesBody
 
-  \job
-    {Formateur freelance}
-    {Valuego, Esicad, UNREP}
-    {Conception et déploiement de dispositifs de formation (présentiel, distanciel, hybride) et animation de sessions.}
-    {2019 -- 2026}
-
-  \job
-    {Ingénieur pédagogique, cat. A}
-    {Ville de Paris}
-    {Conduite de projets à grande échelle, accompagnement d’équipes, structuration de dispositifs et pilotage via indicateurs.}
-    {2019 -- 2020}
-
-  \job
-    {Formateur numérique}
-    {Espace Public Numérique du Relais 59}
-    {Management d’équipe, animation de partenaires, vulgarisation et pédagogie.}
-    {2016 -- 2017}
-
-  \cvsection{Numérique}
+  \cvsection{\CVDigitalHeading}
 
   {\small
-  \textbf{Sciences des données :} Python, SQL, Julia, Poetry, Tableau, Power BI\par
-  \textbf{Apprentissage machine :} Scikit-Learn, PyTorch, TensorFlow\par
-  \textbf{MLOps :} GitHub, Docker, MLflow, Hugging Face, Streamlit\par
-  \textbf{Web / CMS :} HTML, CSS, WordPress, Django et Wagtail, Grav\par
-  \textbf{Automatisation / No-code :} n8n, Airtable\par
-  \textbf{Création de contenu :} Photoshop, InDesign, Audition, OBS, Final Cut Pro\par
-  \textbf{Bureautique :} Office 365, Google Workspace, Notion et \LaTeX  pour générer ce CV\par
+  \CVDigitalBody
   }
 \end{minipage}
 

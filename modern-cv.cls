@@ -101,21 +101,18 @@
 \newcommand{\sideheading}[1]{%
   \vspace{5mm}%
   {\color{TextDark}\bfseries\large\MakeUppercase{#1}}\par
-  \vspace{1.5mm}\color{Rule}\rule{\linewidth}{0.4pt}\color{TextDark}\par
   \vspace{2mm}%
 }
 
 \newcommand{\sideheadingfirst}[1]{%
   {\color{TextDark}\bfseries\large\MakeUppercase{#1}}\par
-  \vspace{1.5mm}\color{Rule}\rule{\linewidth}{0.4pt}\color{TextDark}\par
   \vspace{2mm}%
 }
 
 \newcommand{\cvsection}[1]{%
   \vspace{2mm}%
-  \noindent{\color{TextDark}\bfseries\Large\MakeUppercase{#1}}%
-  \hspace{6mm}{\color{Rule}\rule{\dimexpr\linewidth-40mm\relax}{0.4pt}}%
-  \par\vspace{3mm}%
+  \noindent{\color{TextDark}\bfseries\Large\MakeUppercase{#1}}\par
+  \vspace{3mm}%
 }
 
 \newcommand{\contactitem}[2]{%
@@ -125,12 +122,12 @@
 }
 
 \newcommand{\job}[4]{% role, org, desc, dates
-  \begin{tabularx}{\linewidth}{@{}p{5mm}Xr@{}}
+  \begin{tabularx}{\linewidth}{@{}p{5mm}X>{\raggedleft\arraybackslash}p{28mm}@{}}
     {\color{Muted}\large$\circ$} &
-    {\color{TextDark}\textbf{#1}}\par
+    {\vspace{0pt}\color{TextDark}\textbf{#1}}\par
     {\color{Muted}\textit{#2}}\par
     {\color{TextDark}\small #3}
-    & {\color{Muted}\small #4}
+    & {\vspace{0pt}\color{Muted}\small #4}
   \end{tabularx}
   \vspace{4mm}
 }
