@@ -72,6 +72,10 @@ INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/tools/array.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/tools/array.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/enumitem/enumitem.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/enumitem/enumitem.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/changepage/changepage.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/changepage/changepage.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/paracol/paracol.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/paracol/paracol.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/hyperref/hyperref.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/hyperref/hyperref.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty

@@ -1,0 +1,108 @@
+# Exemple minimal et complet pour demarrer un CV a partir de zero.
+# Ce fichier est compatible avec build_cv.py.
+
+layout:
+  sidebar_width: "0.367\\paperwidth"
+  pad: "12mm"
+  main_gap: "20mm"
+  content_top_offset: "72mm"
+  contact_block_top_shift: "-6mm"
+  header_bar:
+    left_overlap: "48mm"
+    top_shift: "-20mm"
+    bottom_shift: "-58mm"
+
+header:
+  name: "PRENOM NOM"
+  title: "Poste cible"
+  name_font_size: 28
+  letter_space: 8
+  name_title_gap: "1.5mm"
+
+photo:
+  path: "photo.jpg"
+  width: "48mm"
+  radius: "23mm"
+  x_from_pad: "27mm"
+  y_shift: "-39mm"
+  border_width: "2.5pt"
+
+contacts:
+  left:
+    - icon: phone
+      value: "+33 6 00 00 00 00"
+    - icon: envelope
+      value: "prenom.nom@email.com"
+  right:
+    - icon: globe
+      value: "https://mon-site.fr"
+    - icon: map-marker
+      value_lines:
+        - "Paris"
+        - "France"
+
+sidebar:
+  about:
+    heading: "A propos"
+    paragraphs:
+      - "Resume court en 2-3 lignes."
+      - "Tu peux ajouter plusieurs paragraphes."
+
+  formations:
+    heading: "Formations"
+    entries:
+      - diploma: "Master ..."
+        institution: "Universite ..."
+        dates: "2022 -- 2024"
+
+  certifications:
+    heading: "Certifications"
+    # Optionnel:
+    # subtitle: "(maintien des competences)"
+    entries:
+      - diploma: "Certification ..."
+        institution: "Organisme ..."
+        dates: "2025"
+
+  skills:
+    heading: "Competences"
+    items:
+      - "Analyse de donnees"
+      - "Machine learning"
+      - "Gestion de projet"
+
+  languages:
+    heading: "Langues"
+    items:
+      - "Francais (natif)"
+      - "Anglais (B2)"
+
+main:
+  experiences:
+    heading: "Experience"
+    entries:
+      - role: "Data Analyst"
+        organization: "Entreprise A"
+        dates: "2024 -- 2026"
+        description: "Mission principale et impact."
+      - role: "Consultant"
+        organization: "Entreprise B"
+        dates: "2022 -- 2024"
+        bullets:
+          - "Point cle 1"
+          - "Point cle 2"
+          - "Point cle 3"
+
+  digital:
+    heading: "Numerique"
+    categories:
+      - label: "Sciences des donnees"
+        values: "Python, SQL, Tableau"
+      - label: "Creation de contenu"
+        values:
+          latex: "Photoshop, Final~Cut~Pro"
+      - label: "Bureautique"
+        items:
+          - "Office 365"
+          - "Google Workspace"
+          - "Notion"

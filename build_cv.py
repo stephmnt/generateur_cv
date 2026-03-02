@@ -399,6 +399,13 @@ def build_document(data: dict[str, Any]) -> str:
             ),
         ),
         command(
+            "CVSidebarCertificationsSubtitle",
+            render_text(
+                certifications.get("subtitle"),
+                "sidebar.certifications.subtitle",
+            ),
+        ),
+        command(
             "CVSidebarSkillsHeading",
             render_text(require(skills, "heading", "sidebar.skills"), "sidebar.skills.heading"),
         ),

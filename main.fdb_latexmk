@@ -1,10 +1,10 @@
 # Fdb version 4
-["xdvipdfmx"] 1772292068.40075 "main.xdv" "main.pdf" "main" 1772292068.95179 0
-  "main.xdv" 1772292068.31578 29872 badb3510ea7c7129de2fd64e90728b49 "xelatex"
+["xdvipdfmx"] 1772477003.28458 "main.xdv" "main.pdf" "main" 1772477003.8232 0
+  "main.xdv" 1772477003.19653 54076 a1814fd62e1bf61da0dc68d8c07d35cd "xelatex"
   (generated)
   "main.pdf"
   (rewritten before read)
-["xelatex"] 1772292066.04509 "main.tex" "main.xdv" "main" 1772292068.94949 0
+["xelatex"] 1772477000.71907 "main.tex" "main.xdv" "main" 1772477003.82098 0
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmmi10.tfm" 1136768653 1528 abec98dbc43e172678c11b3b9031252a ""
@@ -98,6 +98,7 @@
   "/usr/local/texlive/2025/texmf-dist/tex/latex/base/fontenc.sty" 1738182759 5275 0d62fb62162c7ab056e941ef18c5076d ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/base/size11.clo" 1738182759 8464 e73911cdcc738e82d6adccd28e654bb1 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/carlisle/scalefnt.sty" 1137109962 1360 df2086bf924b14b72d6121fe9502fcdb ""
+  "/usr/local/texlive/2025/texmf-dist/tex/latex/changepage/changepage.sty" 1256071977 4523 a9044e2dc40e764dac60d2acda7ae919 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/enumitem/enumitem.sty" 1738874546 52272 63d293bc0d496619edb57585740861a2 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/eso-pic/eso-pic.sty" 1683144721 11876 6ef493863ae0d7a984706973240c2237 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/etoolbox/etoolbox.sty" 1739306980 46850 d87daedc2abdc653769a6f1067849fe0 ""
@@ -135,6 +136,7 @@
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-LatinModernRoman.cfg" 1739394495 10002 87b90d9edb7468cf5bbd96e0ba2b3367 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-TU-empty.cfg" 1739394495 2361 b2ce88782461b0ab72c7a632cc94b74f ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-cmr.cfg" 1739394495 22906 b0be544692bb405a84d147a96af5d777 ""
+  "/usr/local/texlive/2025/texmf-dist/tex/latex/paracol/paracol.sty" 1729891619 106557 32e9de36b24669ee5b6b58861439b10c ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty" 1601326656 1090 bae35ef70b3168089ef166db3e66f5b2 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty" 1673816307 373 00b204b1d7d095b892ad31a7494b0373 ""
   "/usr/local/texlive/2025/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty" 1601326656 21013 f4ff83d25bb56552493b030f27c075ae ""
@@ -154,10 +156,10 @@
   "/usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf" 1739380943 42148 61becc7c670cd061bb319c643c27fdd4 ""
   "/usr/local/texlive/2025/texmf-var/web2c/xetex/xelatex.fmt" 1769191658 5639807 aee0f6e9223ac7ef16a393d12977c748 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "cv.generated.tex" 1772291910.20451 4281 febbcee41e91f560b722606781df1ca2 ""
-  "main.aux" 1772292068.31382 275 7169fd6829e14d8f0f4bc486e8c03d60 "xelatex"
-  "main.out" 1772292068.13788 0 d41d8cd98f00b204e9800998ecf8427e "xelatex"
-  "main.tex" 1772292063.07078 10339 0158454a24862a1399c46a7ea77e91bb ""
+  "cv.generated.tex" 1772476790.79446 6670 3490d489e2637cbd804292cef9d47f99 ""
+  "main.aux" 1772477003.19455 305 3add1fdb0af4daf6883fc52b829211df "xelatex"
+  "main.out" 1772477002.93854 0 d41d8cd98f00b204e9800998ecf8427e "xelatex"
+  "main.tex" 1772476991.73579 11189 83e143116ed36737b538ad3126fe9e5d ""
   "photo.jpg" 1769185104 44449 b186de560ab63a2a7ccaa22929690365 ""
   (generated)
   "main.aux"

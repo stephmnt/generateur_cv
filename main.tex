@@ -11,6 +11,8 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{enumitem}
+\usepackage{changepage}
+\usepackage{paracol}
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 
@@ -70,6 +72,7 @@ Le Conservatoire National des Arts et Métiers\hfill 2018 -- 2019\par
 }
 
 \newcommand{\CVSidebarCertificationsHeading}{Certifications}
+\newcommand{\CVSidebarCertificationsSubtitle}{}
 \newcommand{\CVSidebarCertificationsBody}{%
 \textbf{Consultant Indépendant Certifié}\par
 Akto\hfill 2025\par\vspace{2mm}
@@ -143,7 +146,16 @@ Le Conservatoire National des Arts et Métiers\hfill 2024\par
   \typeout{WARNING: cv.generated.tex introuvable, valeurs par defaut utilisees.}%
 }
 
-\newcommand{\HeaderSpace}{\ifwithheader\vspace*{\CVContentTopOffset}\fi}
+\newcommand{\CVVerticalPadValue}{\CVPadValue}
+\newcommand{\HeaderSpace}{\ifwithheader\vspace*{\dimexpr\CVContentTopOffset-\CVVerticalPadValue\relax}\fi}
+
+% Keep top/bottom breathing room on all pages (including sidebar overflow pages).
+\newgeometry{
+  left=\CVPadValue,
+  right=\CVPadValue,
+  top=\CVVerticalPadValue,
+  bottom=\CVVerticalPadValue
+}
 
 % --- Layout constants ---
 \newlength{\SidebarW}
@@ -177,6 +189,7 @@ Le Conservatoire National des Arts et Métiers\hfill 2024\par
 
       % Header + photo + titres (seulement si header actif)
       \ifwithheader
+        \ifnum\value{page}=1
         % Header bar (plus chevauchant la sidebar)
         \coordinate (barleft) at ([xshift=\dimexpr\SidebarW-\CVHeaderBarLeftOverlap\relax,yshift=\CVHeaderBarTopShift]current page.north west);
         \coordinate (barright) at ([yshift=\CVHeaderBarBottomShift]current page.north east);
@@ -198,11 +211,12 @@ Le Conservatoire National des Arts et Métiers\hfill 2024\par
         \draw[white,line width=\CVPhotoBorderWidth] (photoc) circle (\photor);
 
         % Name + title
-        \node[anchor=center, align=center] at (barcenter) {%
+\node[anchor=center, align=center] at (barcenter) {%
   {\color{white}\bfseries\fontsize{\CVHeaderNameSize}{\CVHeaderNameSize}\selectfont
    \addfontfeatures{LetterSpace=\CVHeaderNameLetterSpace} \CVHeaderName}\\[\CVHeaderNameTitleGap]
   {\color{white!75}\large \CVHeaderTitle}%
 };
+        \fi
       \fi
     \end{tikzpicture}
   \fi
@@ -265,18 +279,25 @@ Le Conservatoire National des Arts et Métiers\hfill 2024\par
 
 \begin{document}
 \thispagestyle{empty}
+\pagestyle{empty}
 
 % Push content below the header/photo overlay
 \ifwithheader
-  \vspace*{\CVContentTopOffset}
+  \vspace*{\dimexpr\CVContentTopOffset-\CVVerticalPadValue\relax}
 \else
   \vspace*{0mm}
 \fi
 
-% --- Two-column content area (manual) ---
-\noindent
-\hspace*{\Pad}%
-\begin{minipage}[t]{\dimexpr\SidebarW-2\Pad\relax}
+% --- Two-column content area (flowing across pages) ---
+% Keep equal inner margins (=\Pad) on both sides of each zone:
+% sidebar right margin and main-column left margin.
+% In paracol, width specs are computed against \textwidth, so we set
+% margins in geometry and avoid wrapping paracol in adjustwidth.
+\setcolumnwidth{%
+  \dimexpr\SidebarW-2\Pad\relax/\dimexpr2\Pad\relax,
+  \dimexpr\paperwidth-\SidebarW-2\Pad\relax/0pt%
+}
+\begin{paracol}{2}
   % ===== SIDEBAR =====
   \sideheadingfirst{\CVSidebarAboutHeading}
   {\small
@@ -290,6 +311,10 @@ Le Conservatoire National des Arts et Métiers\hfill 2024\par
 
   \sideheading{\CVSidebarCertificationsHeading}
   {\small
+  \if\relax\detokenize{\CVSidebarCertificationsSubtitle}\relax
+  \else
+    {\itshape\footnotesize \CVSidebarCertificationsSubtitle\par\vspace{1mm}}
+  \fi
   \CVSidebarCertificationsBody
   }
 
@@ -306,9 +331,9 @@ Le Conservatoire National des Arts et Métiers\hfill 2024\par
     \CVSidebarLanguagesItems
   \end{itemize}
   }
-\end{minipage}%
-\hspace*{\MainGap}%
-\begin{minipage}[t]{\dimexpr\paperwidth-\SidebarW-\MainGap\relax}
+
+  \switchcolumn
+
   % ===== MAIN COLUMN =====
 
   % Contact block (under header bar)
@@ -330,7 +355,7 @@ Le Conservatoire National des Arts et Métiers\hfill 2024\par
   {\small
   \CVDigitalBody
   }
-\end{minipage}
+\end{paracol}
 
 % =========================
 % OPTIONAL: page 2 without sidebar
