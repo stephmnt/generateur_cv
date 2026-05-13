@@ -1,4 +1,4 @@
-# CV Database Schema (from `cv.yaml`)
+# CV Database Schema (from `configs/*.yaml`)
 
 Mapping used from YAML:
 - `main.experiences.entries` -> `EXPERIENCE`
@@ -82,4 +82,3 @@ erDiagram
       string relation_type
     }
 ```
-

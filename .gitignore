@@ -1,6 +1,18 @@
-# Latex build files
-main*
+# Generated files
+build/
+
+# LaTeX build files
+*.aux
+*.dvi
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.xdv
 .texlive-cache/
 
 # Python virtual environment
 .venv/
+__pycache__/
+.pytest_cache/
