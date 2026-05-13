@@ -1,21 +1,93 @@
 #!/usr/bin/env python3
-"""Generate cv.generated.tex from a YAML CV source."""
+"""Generate cv.generated.tex from CV data."""
 
 from __future__ import annotations
 
 import argparse
+import copy
+import os
+import shutil
+import subprocess
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-CONFIG_DIR = PROJECT_ROOT / "configs"
 BUILD_DIR = PROJECT_ROOT / "build"
+LATEX_DIR = PROJECT_ROOT / "latex"
+ASSETS_DIR = PROJECT_ROOT / "assets"
 
-# Change this value to switch the CV source without passing --input.
-DEFAULT_INPUT_YAML = CONFIG_DIR / "cv-data.yaml"
 DEFAULT_OUTPUT_TEX = BUILD_DIR / "cv.generated.tex"
+DEFAULT_OUTPUT_PDF = BUILD_DIR / "cv.generated.pdf"
+DEFAULT_WORK_DIR = BUILD_DIR / "local-build"
+
+MODERN_CV_TEMPLATE: dict[str, Any] = {
+    "layout": {
+        "sidebar_width": r"0.367\paperwidth",
+        "pad": "12mm",
+        "main_gap": "20mm",
+        "content_top_offset": "56mm",
+        "contact_block_top_shift": "0mm",
+        "header_bar": {
+            "left_overlap": "48mm",
+            "top_shift": "-10mm",
+            "bottom_shift": "-48mm",
+        },
+    },
+    "header": {
+        "name": "",
+        "title": "",
+        "name_font_size": 28,
+        "letter_space": 8,
+        "name_title_gap": "1.5mm",
+    },
+    "photo": {
+        "path": "photo.jpg",
+        "width": "48mm",
+        "radius": "23mm",
+        "x_from_pad": "27mm",
+        "y_shift": "-31mm",
+        "border_width": "2.5pt",
+    },
+    "contacts": {
+        "left": [],
+        "right": [],
+    },
+    "sidebar": {
+        "about": {
+            "heading": "À propos",
+            "paragraphs": [],
+        },
+        "formations": {
+            "heading": "Formations",
+            "entries": [],
+        },
+        "certifications": {
+            "heading": "Certifications",
+            "subtitle": "",
+            "entries": [],
+        },
+        "skills": {
+            "heading": "Compétences",
+            "items": [],
+        },
+        "languages": {
+            "heading": "Langues",
+            "items": [],
+        },
+    },
+    "main": {
+        "experiences": {
+            "heading": "Expérience",
+            "entries": [],
+        },
+        "digital": {
+            "heading": "Numérique",
+            "categories": [],
+        },
+    },
+}
 
 LATEX_SPECIAL_CHARS = {
     "&": r"\&",
@@ -37,7 +109,15 @@ ICON_MAP = {
     "web": r"\faGlobe",
     "map-marker": r"\faMapMarker*",
     "location": r"\faMapMarker*",
+    "linkedin": r"\faLinkedin",
+    "linkedin-round": r"\faLinkedin",
+    "github": r"\faGithub",
+    "github-round": r"\faGithub",
 }
+
+
+def default_cv_data() -> dict[str, Any]:
+    return copy.deepcopy(MODERN_CV_TEMPLATE)
 
 
 def escape_latex(text: str) -> str:
@@ -99,6 +179,12 @@ def render_literal(value: Any, field_name: str) -> str:
     raise TypeError(f"Unsupported literal type for {field_name}: {type(value).__name__}")
 
 
+def render_url(value: Any, field_name: str) -> str:
+    if not isinstance(value, str):
+        raise TypeError(f"{field_name} must be a string")
+    return value.replace("%", r"\%").replace("#", r"\#")
+
+
 def render_icon(value: Any, field_name: str) -> str:
     if isinstance(value, dict):
         return render_text(value, field_name)
@@ -129,6 +215,10 @@ def block_command(name: str, lines: list[str]) -> str:
     return f"\\renewcommand{{\\{name}}}{{%\n{body}\n}}"
 
 
+def ensure_item_lines(lines: list[str]) -> list[str]:
+    return lines or [r"\item[]\vspace{-\baselineskip}"]
+
+
 def render_contacts(items: list[Any], field_name: str) -> list[str]:
     lines: list[str] = []
     for idx, item in enumerate(items):
@@ -148,6 +238,9 @@ def render_contacts(items: list[Any], field_name: str) -> list[str]:
             )
         else:
             value = render_text(require(item, "value", f"{field_name}[{idx}]"), f"{field_name}[{idx}].value")
+            if "url" in item:
+                url = render_url(item["url"], f"{field_name}[{idx}].url")
+                value = rf"\href{{{url}}}{{{value}}}"
 
         lines.append(rf"\contactitem{{{icon}}}{{\small {value}}}")
 
@@ -265,7 +358,7 @@ def render_item_lines(items: list[Any], field_name: str) -> list[str]:
     return lines
 
 
-def build_document(data: dict[str, Any], source_file: str | Path = DEFAULT_INPUT_YAML) -> str:
+def build_document(data: dict[str, Any], source_file: str | Path = "database") -> str:
     layout = require(data, "layout", "root")
     if not isinstance(layout, dict):
         raise TypeError("layout must be an object")
@@ -463,7 +556,7 @@ def build_document(data: dict[str, Any], source_file: str | Path = DEFAULT_INPUT
     out.append(
         block_command(
             "CVSidebarSkillsItems",
-            render_item_lines(skills_items, "sidebar.skills.items"),
+            ensure_item_lines(render_item_lines(skills_items, "sidebar.skills.items")),
         )
     )
     out.append("")
@@ -472,7 +565,7 @@ def build_document(data: dict[str, Any], source_file: str | Path = DEFAULT_INPUT
     out.append(
         block_command(
             "CVSidebarLanguagesItems",
-            render_item_lines(language_items, "sidebar.languages.items"),
+            ensure_item_lines(render_item_lines(language_items, "sidebar.languages.items")),
         )
     )
     out.append("")
@@ -498,35 +591,152 @@ def build_document(data: dict[str, Any], source_file: str | Path = DEFAULT_INPUT
     return "\n".join(out)
 
 
+def copy_build_inputs(work_dir: Path) -> None:
+    for source_dir in (LATEX_DIR, ASSETS_DIR):
+        if not source_dir.exists():
+            continue
+
+        for path in source_dir.iterdir():
+            if path.is_file():
+                shutil.copy2(path, work_dir / path.name)
+
+
+def copy_photo_input(work_dir: Path, data: dict[str, Any]) -> None:
+    photo = data.get("photo", {})
+    if not isinstance(photo, dict):
+        return
+
+    photo_path = photo.get("path")
+    if not isinstance(photo_path, str) or not photo_path:
+        return
+
+    relative_path = Path(photo_path)
+    if relative_path.is_absolute():
+        return
+
+    source_path = (PROJECT_ROOT / relative_path).resolve()
+    try:
+        source_path.relative_to(PROJECT_ROOT.resolve())
+    except ValueError:
+        return
+
+    if not source_path.exists():
+        return
+
+    destination = work_dir / relative_path
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source_path, destination)
+
+
+def run_command(command: list[str], cwd: Path, env: dict[str, str] | None = None) -> None:
+    completed = subprocess.run(
+        command,
+        cwd=cwd,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    if completed.returncode != 0:
+        output = "\n".join(part for part in [completed.stdout, completed.stderr] if part)
+        raise RuntimeError(output.strip() or f"Command failed: {' '.join(command)}")
+
+
+def compile_latex_pdf(work_dir: Path) -> Path:
+    if not shutil.which("lualatex"):
+        raise RuntimeError("lualatex is missing. Install a TeX distribution to compile the PDF.")
+
+    env = os.environ.copy()
+    env["TEXMFVAR"] = str(work_dir / "texmf-var")
+    run_command(
+        ["lualatex", "-interaction=nonstopmode", "-halt-on-error", "main.tex"],
+        cwd=work_dir,
+        env=env,
+    )
+
+    pdf_path = work_dir / "main.pdf"
+    if not pdf_path.exists():
+        raise RuntimeError("LaTeX compilation did not produce main.pdf.")
+
+    return pdf_path
+
+
+def build_pdf(
+    generated_tex: str,
+    data: dict[str, Any],
+    output_pdf_path: Path,
+    work_dir: Path,
+) -> Path:
+    work_dir.mkdir(parents=True, exist_ok=True)
+    copy_build_inputs(work_dir)
+    copy_photo_input(work_dir, data)
+    (work_dir / "cv.generated.tex").write_text(generated_tex, encoding="utf-8")
+
+    compiled_pdf = compile_latex_pdf(work_dir)
+    output_pdf_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(compiled_pdf, output_pdf_path)
+    return output_pdf_path
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description=f"Generate {DEFAULT_OUTPUT_TEX} from {DEFAULT_INPUT_YAML}"
+        description=f"Generate {DEFAULT_OUTPUT_TEX} from CV data"
     )
-    parser.add_argument("--input", "-i", default=str(DEFAULT_INPUT_YAML), help="Input YAML file")
+    parser.add_argument("--input", "-i", help="Optional input YAML file")
     parser.add_argument("--output", "-o", default=str(DEFAULT_OUTPUT_TEX), help="Output TeX file")
+    parser.add_argument(
+        "--compile-pdf",
+        action="store_true",
+        help="Compile the generated TeX file to PDF in a local build directory",
+    )
+    parser.add_argument(
+        "--pdf-output",
+        default=str(DEFAULT_OUTPUT_PDF),
+        help="Output PDF file when --compile-pdf is used",
+    )
+    parser.add_argument(
+        "--work-dir",
+        default=str(DEFAULT_WORK_DIR),
+        help="Temporary local build directory when --compile-pdf is used",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
 
-    input_path = Path(args.input)
     output_path = Path(args.output)
 
-    if not input_path.exists():
-        raise FileNotFoundError(f"Input file not found: {input_path}")
+    if args.input:
+        input_path = Path(args.input)
+        if not input_path.exists():
+            raise FileNotFoundError(f"Input file not found: {input_path}")
 
-    with input_path.open("r", encoding="utf-8") as handle:
-        data = yaml.safe_load(handle)
+        with input_path.open("r", encoding="utf-8") as handle:
+            data = yaml.safe_load(handle)
+        source_file = str(input_path)
+    else:
+        data = default_cv_data()
+        source_file = "built-in modern-cv template"
 
     if not isinstance(data, dict):
         raise TypeError("Root YAML node must be an object")
 
-    generated = build_document(data, source_file=str(input_path))
+    generated = build_document(data, source_file=source_file)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(generated, encoding="utf-8")
 
-    print(f"Generated {output_path} from {input_path}")
+    print(f"Generated {output_path} from {source_file}")
+    if args.compile_pdf:
+        output_pdf_path = build_pdf(
+            generated,
+            data,
+            Path(args.pdf_output),
+            Path(args.work_dir),
+        )
+        print(f"Compiled {output_pdf_path}")
+
     return 0
 
 

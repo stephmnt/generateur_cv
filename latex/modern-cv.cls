@@ -64,8 +64,8 @@
       % Header + photo + titres (seulement si header actif)
       \ifwithheader
         % Header bar (plus chevauchant la sidebar)
-        \coordinate (barleft)  at ([xshift=\SidebarW-48mm,yshift=-20mm]current page.north west);
-        \coordinate (barright) at ([yshift=-58mm]current page.north east);
+        \coordinate (barleft)  at ([xshift=\SidebarW-48mm,yshift=-10mm]current page.north west);
+        \coordinate (barright) at ([yshift=-48mm]current page.north east);
         \fill[HeaderBG] (barleft) rectangle (barright);
 
         % Centre horizontal de la zone blanche (sans sidebar)
@@ -74,7 +74,7 @@
         \coordinate (barcenter) at (whitecenter |- barverticalcenter);
 
         % Photo (plus grande, à cheval)
-        \coordinate (photoc) at ([xshift=\Pad+27mm,yshift=-39mm]current page.north west);
+        \coordinate (photoc) at ([xshift=\Pad+27mm,yshift=-31mm]current page.north west);
         \def\photor{23mm}
 
         \begin{scope}
@@ -86,8 +86,8 @@
         % Name + title
         \node[anchor=center, align=center] at (barcenter) {%
   {\color{white}\bfseries\fontsize{28}{28}\selectfont
-   \addfontfeatures{LetterSpace=8} STÉPHANE MANET}\\[1.5mm]
-  {\color{white!75}\large Data scientist / Machine learning}%
+   \addfontfeatures{LetterSpace=8}}\\[1.5mm]
+  {\color{white!75}\large}%
 };
       \fi
     \end{tikzpicture}
@@ -149,4 +149,4 @@
   \thispagestyle{empty}
 }
 
-\newcommand{\HeaderSpace}{\ifwithheader\vspace*{72mm}\fi}
+\newcommand{\HeaderSpace}{\ifwithheader\vspace*{66mm}\fi}

@@ -1,5 +1,9 @@
 # Generated files
 build/
+instance/
+cahier_des_charges.md
+uploads/
+*.code-workspace
 
 # LaTeX build files
 *.aux

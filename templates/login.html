@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Générateur de CV</title>
+    <title>Connexion</title>
     <style>
       :root {
         color-scheme: light;
@@ -20,7 +20,7 @@
       }
 
       main {
-        width: min(520px, calc(100vw - 32px));
+        width: min(420px, calc(100vw - 32px));
         background: #ffffff;
         border: 1px solid #d9e2ec;
         border-radius: 8px;
@@ -36,20 +36,21 @@
 
       label {
         display: block;
-        margin-bottom: 8px;
+        margin: 16px 0 8px;
         font-size: 14px;
         font-weight: 650;
       }
 
-      select,
+      input,
       button {
         width: 100%;
         min-height: 44px;
         border-radius: 6px;
         font: inherit;
+        box-sizing: border-box;
       }
 
-      select {
+      input {
         border: 1px solid #bcccdc;
         background: #ffffff;
         color: #1f2933;
@@ -57,7 +58,7 @@
       }
 
       button {
-        margin-top: 16px;
+        margin-top: 20px;
         border: 0;
         background: #1f2933;
         color: #ffffff;
@@ -75,30 +76,24 @@
         border-radius: 6px;
         background: #fff1f2;
         color: #9f1239;
-        white-space: pre-wrap;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        font-size: 12px;
-        line-height: 1.45;
-        max-height: 260px;
-        overflow: auto;
+        font-size: 14px;
       }
     </style>
   </head>
   <body>
     <main>
-      <h1>Générateur de CV</h1>
+      <h1>Connexion</h1>
 
-      <form action="{{ url_for('generate') }}" method="post">
-        <label for="yaml_file">Fichier YAML</label>
-        <select id="yaml_file" name="yaml_file" required>
-          {% for path in yaml_files %}
-            <option value="{{ path.name }}" {% if selected == path.name %}selected{% endif %}>
-              {{ path.name }}
-            </option>
-          {% endfor %}
-        </select>
+      <form method="post">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
 
-        <button type="submit">Générer le PDF</button>
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" value="{{ default_email }}" autocomplete="username" required autofocus>
+
+        <label for="password">Mot de passe</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+        <button type="submit">Se connecter</button>
       </form>
 
       {% if error %}

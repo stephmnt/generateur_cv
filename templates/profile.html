@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Profil</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #1f2933;
+        background: #f5f7fa;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      main {
+        width: min(1120px, calc(100vw - 32px));
+        margin: 32px auto;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      h2 {
+        font-size: 19px;
+      }
+
+      h3 {
+        font-size: 15px;
+      }
+
+      a {
+        color: #1f2933;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .nav-link {
+        border-radius: 6px;
+        padding: 9px 10px;
+      }
+
+      .nav-link.active {
+        background: #e5e7eb;
+      }
+
+      .nav form {
+        margin: 0;
+      }
+
+      .nav button {
+        min-height: 38px;
+        width: auto;
+        padding: 0 14px;
+      }
+
+      .tabs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 4px 0 14px;
+      }
+
+      .tab-button {
+        width: auto;
+        min-height: 40px;
+        border: 1px solid #d9e2ec;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #1f2933;
+        padding: 0 14px;
+        white-space: nowrap;
+      }
+
+      .tab-button.active {
+        border-color: #1f2933;
+        background: #1f2933;
+        color: #ffffff;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+
+      .tab-panel.active {
+        display: block;
+      }
+
+      .panel,
+      .item-card,
+      .add-card {
+        background: #ffffff;
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+      }
+
+      .panel {
+        padding: 24px;
+        margin-bottom: 18px;
+      }
+
+      .section-head,
+      .item-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .item-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .item-card,
+      .add-card {
+        padding: 18px;
+      }
+
+      .add-card {
+        margin-top: 18px;
+      }
+
+      .item-card.dragging {
+        opacity: 0.55;
+      }
+
+      .drag-handle {
+        width: auto;
+        min-width: 38px;
+        min-height: 34px;
+        padding: 0 10px;
+        background: #e5e7eb;
+        color: #1f2933;
+        cursor: grab;
+      }
+
+      .drag-handle:active {
+        cursor: grabbing;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .grid-compact {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .full {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      input,
+      textarea,
+      button {
+        width: 100%;
+        border-radius: 6px;
+        font: inherit;
+        box-sizing: border-box;
+      }
+
+      input,
+      textarea {
+        border: 1px solid #bcccdc;
+        background: #ffffff;
+        color: #1f2933;
+        padding: 11px 12px;
+      }
+
+      textarea {
+        min-height: 112px;
+        resize: vertical;
+      }
+
+      button {
+        min-height: 40px;
+        border: 0;
+        background: #1f2933;
+        color: #ffffff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #323f4b;
+      }
+
+      .secondary {
+        background: #e5e7eb;
+        color: #1f2933;
+      }
+
+      .secondary:hover {
+        background: #d1d5db;
+      }
+
+      .danger {
+        background: #991b1b;
+      }
+
+      .danger:hover {
+        background: #7f1d1d;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: flex-start;
+        margin-top: 14px;
+      }
+
+      .actions form,
+      .actions button {
+        width: auto;
+      }
+
+      .actions button {
+        min-width: 132px;
+        padding: 0 14px;
+      }
+
+      .notice,
+      .error {
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .notice {
+        background: #ecfdf5;
+        color: #166534;
+      }
+
+      .error {
+        background: #fff1f2;
+        color: #9f1239;
+      }
+
+      .hint,
+      .empty,
+      .inline-status {
+        color: #52606d;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .hint {
+        margin-top: 6px;
+      }
+
+      .inline-status {
+        min-height: 18px;
+        margin: -6px 0 10px;
+      }
+
+      .checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 28px;
+      }
+
+      .checkbox input {
+        width: auto;
+      }
+
+      @media (max-width: 760px) {
+        .grid,
+        .grid-compact {
+          grid-template-columns: 1fr;
+        }
+
+        header,
+        .nav,
+        .actions,
+        .section-head,
+        .item-head {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .actions form,
+        .actions button,
+        .drag-handle {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Profil</h1>
+        {% include "_nav.html" %}
+      </header>
+
+      {% if saved %}
+        <div class="notice">Profil enregistré.</div>
+      {% endif %}
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+      <div class="tabs" role="tablist" aria-label="Sections du profil">
+        <button class="tab-button" type="button" role="tab" data-tab-target="personal">Informations personnelles</button>
+        <button class="tab-button" type="button" role="tab" data-tab-target="experiences">Expérience</button>
+        <button class="tab-button" type="button" role="tab" data-tab-target="educations">Formation</button>
+        <button class="tab-button" type="button" role="tab" data-tab-target="certifications">Certification</button>
+        <button class="tab-button" type="button" role="tab" data-tab-target="skills">Compétences</button>
+        <button class="tab-button" type="button" role="tab" data-tab-target="languages">Langue</button>
+        <button class="tab-button" type="button" role="tab" data-tab-target="digital">Numérique</button>
+      </div>
+
+      <section class="tab-panel active" data-tab-panel="personal" role="tabpanel">
+        <div class="panel">
+          <div class="section-head">
+            <h2>Informations personnelles</h2>
+          </div>
+          <form action="{{ url_for('update_profile') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <div class="grid">
+              <div>
+                <label for="first_name">Prénom</label>
+                <input id="first_name" name="first_name" value="{{ profile.first_name }}">
+              </div>
+              <div>
+                <label for="last_name">Nom</label>
+                <input id="last_name" name="last_name" value="{{ profile.last_name }}">
+              </div>
+              <div>
+                <label for="photo">Photo</label>
+                <input id="photo" name="photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                {% if profile.photo_path %}
+                  <div class="hint">Photo actuelle : {{ profile.photo_path }}</div>
+                {% endif %}
+              </div>
+              <div>
+                <label for="email">E-mail</label>
+                <input id="email" name="email" type="email" value="{{ profile.email }}">
+              </div>
+              <div>
+                <label for="phone">Téléphone</label>
+                <input id="phone" name="phone" value="{{ profile.phone }}">
+              </div>
+              <div>
+                <label for="website">Site web</label>
+                <input id="website" name="website" value="{{ profile.website }}">
+              </div>
+              <div>
+                <label for="linkedin">LinkedIn</label>
+                <input id="linkedin" name="linkedin" value="{{ profile.linkedin }}">
+              </div>
+              <div>
+                <label for="github">GitHub</label>
+                <input id="github" name="github" value="{{ profile.github }}">
+              </div>
+              <div>
+                <label for="address_line_1">Adresse 1</label>
+                <input id="address_line_1" name="address_line_1" value="{{ profile.address_line_1 }}">
+              </div>
+              <div>
+                <label for="address_line_2">Adresse 2</label>
+                <input id="address_line_2" name="address_line_2" value="{{ profile.address_line_2 }}">
+              </div>
+              <div>
+                <label for="postal_code">Code postal</label>
+                <input id="postal_code" name="postal_code" value="{{ profile.postal_code }}">
+              </div>
+              <div>
+                <label for="city">Ville</label>
+                <input id="city" name="city" value="{{ profile.city }}">
+              </div>
+              <div>
+                <label for="country">Pays</label>
+                <input id="country" name="country" value="{{ profile.country }}">
+              </div>
+            </div>
+            <div class="actions">
+              <button type="submit">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="experiences" role="tabpanel">
+        <div class="panel">
+          <div class="section-head">
+            <h2>Expérience</h2>
+          </div>
+          <div class="item-list">
+            {% for item in experiences %}
+              <article class="item-card">
+                <div class="item-head">
+                  <h3>{{ item.role or "Expérience" }}</h3>
+                </div>
+                <form action="{{ url_for('update_profile_section', section='experiences', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <div class="grid">
+                    <div>
+                      <label>Poste</label>
+                      <input name="role" value="{{ item.role }}">
+                    </div>
+                    <div>
+                      <label>Organisation</label>
+                      <input name="organization" value="{{ item.organization }}">
+                    </div>
+                    <div>
+                      <label>Début</label>
+                      <input name="start_date" value="{{ item.start_date }}">
+                    </div>
+                    <div>
+                      <label>Fin</label>
+                      <input name="end_date" value="{{ item.end_date }}">
+                    </div>
+                    <label class="checkbox">
+                      <input name="is_current" type="checkbox" value="1" {% if item.is_current %}checked{% endif %}>
+                      Poste actuel
+                    </label>
+                    <div class="full">
+                      <label>Description</label>
+                      <textarea name="description">{{ item.description }}</textarea>
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button type="submit">Enregistrer</button>
+                  </div>
+                </form>
+                <form class="actions" action="{{ url_for('delete_profile_section', section='experiences', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="danger">Supprimer</button>
+                </form>
+              </article>
+            {% else %}
+              <p class="empty">Aucune expérience enregistrée.</p>
+            {% endfor %}
+          </div>
+
+          <div class="add-card">
+            <div class="item-head">
+              <h3>Ajouter une expérience</h3>
+            </div>
+            <form action="{{ url_for('add_profile_section', section='experiences') }}" method="post">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <div class="grid">
+                <input name="role" placeholder="Poste">
+                <input name="organization" placeholder="Organisation">
+                <input name="start_date" placeholder="Début">
+                <input name="end_date" placeholder="Fin">
+                <label class="checkbox">
+                  <input name="is_current" type="checkbox" value="1">
+                  Poste actuel
+                </label>
+                <textarea class="full" name="description" placeholder="Description"></textarea>
+              </div>
+              <div class="actions">
+                <button type="submit">Ajouter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="educations" role="tabpanel">
+        <div class="panel">
+          <div class="section-head">
+            <h2>Formation</h2>
+          </div>
+          <div class="item-list">
+            {% for item in educations %}
+              <article class="item-card">
+                <div class="item-head">
+                  <h3>{{ item.diploma or "Formation" }}</h3>
+                </div>
+                <form action="{{ url_for('update_profile_section', section='educations', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <div class="grid-compact">
+                    <input name="diploma" value="{{ item.diploma }}" placeholder="Diplôme">
+                    <input name="institution" value="{{ item.institution }}" placeholder="Établissement">
+                    <input name="start_date" value="{{ item.start_date }}" placeholder="Début">
+                    <input name="end_date" value="{{ item.end_date }}" placeholder="Fin">
+                  </div>
+                  <div class="actions">
+                    <button type="submit">Enregistrer</button>
+                  </div>
+                </form>
+                <form class="actions" action="{{ url_for('delete_profile_section', section='educations', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="danger">Supprimer</button>
+                </form>
+              </article>
+            {% else %}
+              <p class="empty">Aucune formation enregistrée.</p>
+            {% endfor %}
+          </div>
+
+          <div class="add-card">
+            <div class="item-head">
+              <h3>Ajouter une formation</h3>
+            </div>
+            <form action="{{ url_for('add_profile_section', section='educations') }}" method="post">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <div class="grid-compact">
+                <input name="diploma" placeholder="Diplôme">
+                <input name="institution" placeholder="Établissement">
+                <input name="start_date" placeholder="Début">
+                <input name="end_date" placeholder="Fin">
+              </div>
+              <div class="actions">
+                <button type="submit">Ajouter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="certifications" role="tabpanel">
+        <div class="panel">
+          <div class="section-head">
+            <h2>Certification</h2>
+          </div>
+          <div class="item-list">
+            {% for item in certifications %}
+              <article class="item-card">
+                <div class="item-head">
+                  <h3>{{ item.diploma or "Certification" }}</h3>
+                </div>
+                <form action="{{ url_for('update_profile_section', section='certifications', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <div class="grid-compact">
+                    <input name="diploma" value="{{ item.diploma }}" placeholder="Intitulé">
+                    <input name="institution" value="{{ item.institution }}" placeholder="Organisme">
+                    <input name="date_obtained" value="{{ item.date_obtained }}" placeholder="Date">
+                  </div>
+                  <div class="actions">
+                    <button type="submit">Enregistrer</button>
+                  </div>
+                </form>
+                <form class="actions" action="{{ url_for('delete_profile_section', section='certifications', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="danger">Supprimer</button>
+                </form>
+              </article>
+            {% else %}
+              <p class="empty">Aucune certification enregistrée.</p>
+            {% endfor %}
+          </div>
+
+          <div class="add-card">
+            <div class="item-head">
+              <h3>Ajouter une certification</h3>
+            </div>
+            <form action="{{ url_for('add_profile_section', section='certifications') }}" method="post">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <div class="grid-compact">
+                <input name="diploma" placeholder="Intitulé">
+                <input name="institution" placeholder="Organisme">
+                <input name="date_obtained" placeholder="Date">
+              </div>
+              <div class="actions">
+                <button type="submit">Ajouter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="skills" role="tabpanel">
+        <div class="panel">
+          <div class="section-head">
+            <h2>Compétences</h2>
+            <div class="inline-status" data-reorder-status></div>
+          </div>
+          <div class="item-list" data-draggable-list data-reorder-url="{{ url_for('reorder_profile_section', section='skills') }}">
+            {% for item in skills %}
+              <article class="item-card draggable-item" data-item-id="{{ item.id }}">
+                <div class="item-head">
+                  <h3>{{ item.label or "Compétence" }}</h3>
+                  <button class="drag-handle" type="button" draggable="true" aria-label="Déplacer">::</button>
+                </div>
+                <form action="{{ url_for('update_profile_section', section='skills', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <div class="grid-compact">
+                    <input name="label" value="{{ item.label }}" placeholder="Libellé">
+                    <input name="category" value="{{ item.category }}" placeholder="Catégorie">
+                  </div>
+                  <div class="actions">
+                    <button type="submit">Enregistrer</button>
+                  </div>
+                </form>
+                <form class="actions" action="{{ url_for('delete_profile_section', section='skills', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="danger">Supprimer</button>
+                </form>
+              </article>
+            {% else %}
+              <p class="empty">Aucune compétence enregistrée.</p>
+            {% endfor %}
+          </div>
+
+          <div class="add-card">
+            <div class="item-head">
+              <h3>Ajouter une compétence</h3>
+            </div>
+            <form action="{{ url_for('add_profile_section', section='skills') }}" method="post">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <div class="grid-compact">
+                <input name="label" placeholder="Libellé">
+                <input name="category" placeholder="Catégorie">
+              </div>
+              <div class="actions">
+                <button type="submit">Ajouter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="languages" role="tabpanel">
+        <div class="panel">
+          <div class="section-head">
+            <h2>Langue</h2>
+            <div class="inline-status" data-reorder-status></div>
+          </div>
+          <div class="item-list" data-draggable-list data-reorder-url="{{ url_for('reorder_profile_section', section='languages') }}">
+            {% for item in languages %}
+              <article class="item-card draggable-item" data-item-id="{{ item.id }}">
+                <div class="item-head">
+                  <h3>{{ item.language or "Langue" }}</h3>
+                  <button class="drag-handle" type="button" draggable="true" aria-label="Déplacer">::</button>
+                </div>
+                <form action="{{ url_for('update_profile_section', section='languages', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <div class="grid-compact">
+                    <input name="language" value="{{ item.language }}" placeholder="Langue">
+                    <input name="level" value="{{ item.level }}" placeholder="Niveau">
+                  </div>
+                  <div class="actions">
+                    <button type="submit">Enregistrer</button>
+                  </div>
+                </form>
+                <form class="actions" action="{{ url_for('delete_profile_section', section='languages', item_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="danger">Supprimer</button>
+                </form>
+              </article>
+            {% else %}
+              <p class="empty">Aucune langue enregistrée.</p>
+            {% endfor %}
+          </div>
+
+          <div class="add-card">
+            <div class="item-head">
+              <h3>Ajouter une langue</h3>
+            </div>
+            <form action="{{ url_for('add_profile_section', section='languages') }}" method="post">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <div class="grid-compact">
+                <input name="language" placeholder="Langue">
+                <input name="level" placeholder="Niveau">
+              </div>
+              <div class="actions">
+                <button type="submit">Ajouter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="digital" role="tabpanel">
+        <div class="panel">
+          <div class="section-head">
+            <h2>Numérique</h2>
+            <div class="inline-status" data-reorder-status></div>
+          </div>
+          <div class="item-list" data-draggable-list data-reorder-url="{{ url_for('reorder_profile_section', section='digital_categories') }}">
+            {% for item in digital_categories %}
+              <article class="item-card draggable-item" data-item-id="{{ item.id }}">
+                <div class="item-head">
+                  <h3>{{ item.label or "Catégorie numérique" }}</h3>
+                  <button class="drag-handle" type="button" draggable="true" aria-label="Déplacer">::</button>
+                </div>
+                <form action="{{ url_for('update_digital_category', category_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <div class="grid">
+                    <input name="label" value="{{ item.label }}" placeholder="Catégorie">
+                    <textarea class="full" name="skills_text" placeholder="Compétences">{{ item.skills_text }}</textarea>
+                  </div>
+                  <div class="actions">
+                    <button type="submit">Enregistrer</button>
+                  </div>
+                </form>
+                <form class="actions" action="{{ url_for('delete_digital_category', category_id=item.id) }}" method="post">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="danger">Supprimer</button>
+                </form>
+              </article>
+            {% else %}
+              <p class="empty">Aucune catégorie numérique enregistrée.</p>
+            {% endfor %}
+          </div>
+
+          <div class="add-card">
+            <div class="item-head">
+              <h3>Ajouter une catégorie numérique</h3>
+            </div>
+            <form action="{{ url_for('add_digital_category') }}" method="post">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <div class="grid">
+                <input name="label" placeholder="Catégorie">
+                <textarea class="full" name="skills_text" placeholder="Compétences"></textarea>
+              </div>
+              <div class="actions">
+                <button type="submit">Ajouter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      const tabButtons = Array.from(document.querySelectorAll("[data-tab-target]"));
+      const tabPanels = Array.from(document.querySelectorAll("[data-tab-panel]"));
+      const tabIds = tabButtons.map((button) => button.dataset.tabTarget);
+
+      function activateTab(tabId, persist = true) {
+        const selectedTab = tabIds.includes(tabId) ? tabId : "personal";
+
+        tabButtons.forEach((button) => {
+          const isActive = button.dataset.tabTarget === selectedTab;
+          button.classList.toggle("active", isActive);
+          button.setAttribute("aria-selected", isActive ? "true" : "false");
+        });
+
+        tabPanels.forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.tabPanel === selectedTab);
+        });
+
+        if (persist) {
+          localStorage.setItem("profile.activeTab", selectedTab);
+          history.replaceState(null, "", `#${selectedTab}`);
+        }
+      }
+
+      tabButtons.forEach((button) => {
+        button.addEventListener("click", () => activateTab(button.dataset.tabTarget));
+      });
+
+      const initialTab = window.location.hash.replace("#", "") || localStorage.getItem("profile.activeTab") || "personal";
+      activateTab(initialTab, false);
+
+      let draggedItem = null;
+
+      function itemAfterPointer(list, y) {
+        const items = Array.from(list.querySelectorAll(".draggable-item:not(.dragging)"));
+        return items.reduce(
+          (closest, item) => {
+            const box = item.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+              return { offset, item };
+            }
+            return closest;
+          },
+          { offset: Number.NEGATIVE_INFINITY, item: null }
+        ).item;
+      }
+
+      async function persistOrder(list) {
+        const status = list.closest(".panel").querySelector("[data-reorder-status]");
+        const itemIds = Array.from(list.querySelectorAll(".draggable-item")).map((item) => item.dataset.itemId);
+
+        if (status) {
+          status.textContent = "Enregistrement...";
+        }
+
+        const response = await fetch(list.dataset.reorderUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrfToken
+          },
+          body: JSON.stringify({ item_ids: itemIds })
+        });
+
+        if (!response.ok) {
+          throw new Error("Reorder failed");
+        }
+
+        if (status) {
+          status.textContent = "Ordre enregistré.";
+          window.setTimeout(() => {
+            status.textContent = "";
+          }, 1600);
+        }
+      }
+
+      document.querySelectorAll("[data-draggable-list]").forEach((list) => {
+        list.addEventListener("dragstart", (event) => {
+          const handle = event.target.closest(".drag-handle");
+          if (!handle || !list.contains(handle)) {
+            event.preventDefault();
+            return;
+          }
+
+          draggedItem = handle.closest(".draggable-item");
+          draggedItem.classList.add("dragging");
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", draggedItem.dataset.itemId);
+        });
+
+        list.addEventListener("dragover", (event) => {
+          if (!draggedItem || !list.contains(draggedItem)) {
+            return;
+          }
+
+          event.preventDefault();
+          const afterItem = itemAfterPointer(list, event.clientY);
+          if (afterItem) {
+            list.insertBefore(draggedItem, afterItem);
+          } else {
+            list.appendChild(draggedItem);
+          }
+        });
+
+        list.addEventListener("drop", async (event) => {
+          if (!draggedItem || !list.contains(draggedItem)) {
+            return;
+          }
+
+          event.preventDefault();
+          try {
+            await persistOrder(list);
+          } catch {
+            const status = list.closest(".panel").querySelector("[data-reorder-status]");
+            if (status) {
+              status.textContent = "L'ordre n'a pas pu être enregistré.";
+            }
+          }
+        });
+      });
+
+      document.addEventListener("dragend", () => {
+        if (draggedItem) {
+          draggedItem.classList.remove("dragging");
+        }
+        draggedItem = null;
+      });
+    </script>
+  </body>
+</html>
