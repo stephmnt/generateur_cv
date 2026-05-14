@@ -1,343 +1,27 @@
-<!doctype html>
-<html lang="fr">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Profil</title>
-    <style>
-      :root {
-        color-scheme: light;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #1f2933;
-        background: #f5f7fa;
-      }
+  {% extends "base.html" %}
+  {% macro usage_hint(usage) -%}
+    <div class="usage-hint">
+      {% if usage %}
+        Utilisé dans : {{ usage | join(", ") }}.
+      {% else %}
+        Aucun CV ne l'utilise actuellement.
+      {% endif %}
+    </div>
+  {%- endmacro %}
 
-      body {
-        margin: 0;
-        min-height: 100vh;
-      }
+  {% macro delete_warning(usage) -%}
+    {% if usage %}
+      <div class="delete-warning">Attention : utilisé dans {{ usage | join(", ") }}.</div>
+    {% endif %}
+  {%- endmacro %}
 
-      main {
-        width: min(1120px, calc(100vw - 32px));
-        margin: 32px auto;
-      }
+  {% macro delete_warning_attrs(usage, label) -%}
+    {% if usage %}data-delete-warning="Cet élément est utilisé dans : {{ usage | join(', ') }}. Le supprimer le retirera de ces CV. Continuer ?"{% endif %}
+  {%- endmacro %}
 
-      header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 20px;
-      }
-
-      h1,
-      h2,
-      h3 {
-        margin: 0;
-        line-height: 1.2;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      h2 {
-        font-size: 19px;
-      }
-
-      h3 {
-        font-size: 15px;
-      }
-
-      a {
-        color: #1f2933;
-        font-weight: 700;
-        text-decoration: none;
-      }
-
-      .nav {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-
-      .nav-link {
-        border-radius: 6px;
-        padding: 9px 10px;
-      }
-
-      .nav-link.active {
-        background: #e5e7eb;
-      }
-
-      .nav form {
-        margin: 0;
-      }
-
-      .nav button {
-        min-height: 38px;
-        width: auto;
-        padding: 0 14px;
-      }
-
-      .tabs {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        overflow-x: auto;
-        padding: 4px 0 14px;
-      }
-
-      .tab-button {
-        width: auto;
-        min-height: 40px;
-        border: 1px solid #d9e2ec;
-        border-radius: 6px;
-        background: #ffffff;
-        color: #1f2933;
-        padding: 0 14px;
-        white-space: nowrap;
-      }
-
-      .tab-button.active {
-        border-color: #1f2933;
-        background: #1f2933;
-        color: #ffffff;
-      }
-
-      .tab-panel {
-        display: none;
-      }
-
-      .tab-panel.active {
-        display: block;
-      }
-
-      .panel,
-      .item-card,
-      .add-card {
-        background: #ffffff;
-        border: 1px solid #d9e2ec;
-        border-radius: 8px;
-        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
-      }
-
-      .panel {
-        padding: 24px;
-        margin-bottom: 18px;
-      }
-
-      .section-head,
-      .item-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 18px;
-      }
-
-      .item-list {
-        display: grid;
-        gap: 14px;
-      }
-
-      .item-card,
-      .add-card {
-        padding: 18px;
-      }
-
-      .add-card {
-        margin-top: 18px;
-      }
-
-      .item-card.dragging {
-        opacity: 0.55;
-      }
-
-      .drag-handle {
-        width: auto;
-        min-width: 38px;
-        min-height: 34px;
-        padding: 0 10px;
-        background: #e5e7eb;
-        color: #1f2933;
-        cursor: grab;
-      }
-
-      .drag-handle:active {
-        cursor: grabbing;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-      }
-
-      .grid-compact {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-      }
-
-      .full {
-        grid-column: 1 / -1;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 13px;
-        font-weight: 650;
-      }
-
-      input,
-      textarea,
-      button {
-        width: 100%;
-        border-radius: 6px;
-        font: inherit;
-        box-sizing: border-box;
-      }
-
-      input,
-      textarea {
-        border: 1px solid #bcccdc;
-        background: #ffffff;
-        color: #1f2933;
-        padding: 11px 12px;
-      }
-
-      textarea {
-        min-height: 112px;
-        resize: vertical;
-      }
-
-      button {
-        min-height: 40px;
-        border: 0;
-        background: #1f2933;
-        color: #ffffff;
-        font-weight: 700;
-        cursor: pointer;
-      }
-
-      button:hover {
-        background: #323f4b;
-      }
-
-      .secondary {
-        background: #e5e7eb;
-        color: #1f2933;
-      }
-
-      .secondary:hover {
-        background: #d1d5db;
-      }
-
-      .danger {
-        background: #991b1b;
-      }
-
-      .danger:hover {
-        background: #7f1d1d;
-      }
-
-      .actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        justify-content: flex-start;
-        margin-top: 14px;
-      }
-
-      .actions form,
-      .actions button {
-        width: auto;
-      }
-
-      .actions button {
-        min-width: 132px;
-        padding: 0 14px;
-      }
-
-      .notice,
-      .error {
-        margin-bottom: 18px;
-        padding: 12px 14px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 700;
-      }
-
-      .notice {
-        background: #ecfdf5;
-        color: #166534;
-      }
-
-      .error {
-        background: #fff1f2;
-        color: #9f1239;
-      }
-
-      .hint,
-      .empty,
-      .inline-status {
-        color: #52606d;
-        font-size: 13px;
-        line-height: 1.45;
-      }
-
-      .hint {
-        margin-top: 6px;
-      }
-
-      .inline-status {
-        min-height: 18px;
-        margin: -6px 0 10px;
-      }
-
-      .checkbox {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 28px;
-      }
-
-      .checkbox input {
-        width: auto;
-      }
-
-      @media (max-width: 760px) {
-        .grid,
-        .grid-compact {
-          grid-template-columns: 1fr;
-        }
-
-        header,
-        .nav,
-        .actions,
-        .section-head,
-        .item-head {
-          align-items: stretch;
-          flex-direction: column;
-        }
-
-        .actions form,
-        .actions button,
-        .drag-handle {
-          width: 100%;
-        }
-      }
-    </style>
-  </head>
-  <body>
+  {% block content %}
     <main>
-      <header>
-        <h1>Profil</h1>
         {% include "_nav.html" %}
-      </header>
 
       {% if saved %}
         <div class="notice">Profil enregistré.</div>
@@ -367,10 +51,12 @@
               <div>
                 <label for="first_name">Prénom</label>
                 <input id="first_name" name="first_name" value="{{ profile.first_name }}">
+                {{ usage_hint(profile_usage.first_name) }}
               </div>
               <div>
                 <label for="last_name">Nom</label>
                 <input id="last_name" name="last_name" value="{{ profile.last_name }}">
+                {{ usage_hint(profile_usage.last_name) }}
               </div>
               <div>
                 <label for="photo">Photo</label>
@@ -378,46 +64,57 @@
                 {% if profile.photo_path %}
                   <div class="hint">Photo actuelle : {{ profile.photo_path }}</div>
                 {% endif %}
+                {{ usage_hint(profile_usage.photo_path) }}
               </div>
               <div>
                 <label for="email">E-mail</label>
                 <input id="email" name="email" type="email" value="{{ profile.email }}">
+                {{ usage_hint(profile_usage.email) }}
               </div>
               <div>
                 <label for="phone">Téléphone</label>
                 <input id="phone" name="phone" value="{{ profile.phone }}">
+                {{ usage_hint(profile_usage.phone) }}
               </div>
               <div>
                 <label for="website">Site web</label>
                 <input id="website" name="website" value="{{ profile.website }}">
+                {{ usage_hint(profile_usage.website) }}
               </div>
               <div>
                 <label for="linkedin">LinkedIn</label>
                 <input id="linkedin" name="linkedin" value="{{ profile.linkedin }}">
+                {{ usage_hint(profile_usage.linkedin) }}
               </div>
               <div>
                 <label for="github">GitHub</label>
                 <input id="github" name="github" value="{{ profile.github }}">
+                {{ usage_hint(profile_usage.github) }}
               </div>
               <div>
                 <label for="address_line_1">Adresse 1</label>
                 <input id="address_line_1" name="address_line_1" value="{{ profile.address_line_1 }}">
+                {{ usage_hint(profile_usage.address_line_1) }}
               </div>
               <div>
                 <label for="address_line_2">Adresse 2</label>
                 <input id="address_line_2" name="address_line_2" value="{{ profile.address_line_2 }}">
+                {{ usage_hint(profile_usage.address_line_2) }}
               </div>
               <div>
                 <label for="postal_code">Code postal</label>
                 <input id="postal_code" name="postal_code" value="{{ profile.postal_code }}">
+                {{ usage_hint(profile_usage.postal_code) }}
               </div>
               <div>
                 <label for="city">Ville</label>
                 <input id="city" name="city" value="{{ profile.city }}">
+                {{ usage_hint(profile_usage.city) }}
               </div>
               <div>
                 <label for="country">Pays</label>
                 <input id="country" name="country" value="{{ profile.country }}">
+                {{ usage_hint(profile_usage.country) }}
               </div>
             </div>
             <div class="actions">
@@ -434,6 +131,7 @@
           </div>
           <div class="item-list">
             {% for item in experiences %}
+              {% set usage = item_usage.experiences.get(item.id, []) %}
               <article class="item-card">
                 <div class="item-head">
                   <h3>{{ item.role or "Expérience" }}</h3>
@@ -444,34 +142,43 @@
                     <div>
                       <label>Poste</label>
                       <input name="role" value="{{ item.role }}">
+                      {{ usage_hint(usage) }}
                     </div>
                     <div>
                       <label>Organisation</label>
                       <input name="organization" value="{{ item.organization }}">
+                      {{ usage_hint(usage) }}
                     </div>
                     <div>
                       <label>Début</label>
                       <input name="start_date" value="{{ item.start_date }}">
+                      {{ usage_hint(usage) }}
                     </div>
                     <div>
                       <label>Fin</label>
                       <input name="end_date" value="{{ item.end_date }}">
+                      {{ usage_hint(usage) }}
                     </div>
-                    <label class="checkbox">
-                      <input name="is_current" type="checkbox" value="1" {% if item.is_current %}checked{% endif %}>
-                      Poste actuel
-                    </label>
+                    <div>
+                      <label class="checkbox">
+                        <input name="is_current" type="checkbox" value="1" {% if item.is_current %}checked{% endif %}>
+                        Poste actuel
+                      </label>
+                      {{ usage_hint(usage) }}
+                    </div>
                     <div class="full">
                       <label>Description</label>
                       <textarea name="description">{{ item.description }}</textarea>
+                      {{ usage_hint(usage) }}
                     </div>
                   </div>
                   <div class="actions">
                     <button type="submit">Enregistrer</button>
                   </div>
                 </form>
-                <form class="actions" action="{{ url_for('delete_profile_section', section='experiences', item_id=item.id) }}" method="post">
+                <form class="actions" action="{{ url_for('delete_profile_section', section='experiences', item_id=item.id) }}" method="post" {{ delete_warning_attrs(usage, "Cette expérience") }}>
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  {{ delete_warning(usage) }}
                   <button type="submit" class="danger">Supprimer</button>
                 </form>
               </article>
@@ -512,6 +219,7 @@
           </div>
           <div class="item-list">
             {% for item in educations %}
+              {% set usage = item_usage.educations.get(item.id, []) %}
               <article class="item-card">
                 <div class="item-head">
                   <h3>{{ item.diploma or "Formation" }}</h3>
@@ -519,17 +227,30 @@
                 <form action="{{ url_for('update_profile_section', section='educations', item_id=item.id) }}" method="post">
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                   <div class="grid-compact">
-                    <input name="diploma" value="{{ item.diploma }}" placeholder="Diplôme">
-                    <input name="institution" value="{{ item.institution }}" placeholder="Établissement">
-                    <input name="start_date" value="{{ item.start_date }}" placeholder="Début">
-                    <input name="end_date" value="{{ item.end_date }}" placeholder="Fin">
+                    <div>
+                      <input name="diploma" value="{{ item.diploma }}" placeholder="Diplôme">
+                      {{ usage_hint(usage) }}
+                    </div>
+                    <div>
+                      <input name="institution" value="{{ item.institution }}" placeholder="Établissement">
+                      {{ usage_hint(usage) }}
+                    </div>
+                    <div>
+                      <input name="start_date" value="{{ item.start_date }}" placeholder="Début">
+                      {{ usage_hint(usage) }}
+                    </div>
+                    <div>
+                      <input name="end_date" value="{{ item.end_date }}" placeholder="Fin">
+                      {{ usage_hint(usage) }}
+                    </div>
                   </div>
                   <div class="actions">
                     <button type="submit">Enregistrer</button>
                   </div>
                 </form>
-                <form class="actions" action="{{ url_for('delete_profile_section', section='educations', item_id=item.id) }}" method="post">
+                <form class="actions" action="{{ url_for('delete_profile_section', section='educations', item_id=item.id) }}" method="post" {{ delete_warning_attrs(usage, "Cette formation") }}>
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  {{ delete_warning(usage) }}
                   <button type="submit" class="danger">Supprimer</button>
                 </form>
               </article>
@@ -565,6 +286,7 @@
           </div>
           <div class="item-list">
             {% for item in certifications %}
+              {% set usage = item_usage.certifications.get(item.id, []) %}
               <article class="item-card">
                 <div class="item-head">
                   <h3>{{ item.diploma or "Certification" }}</h3>
@@ -572,16 +294,26 @@
                 <form action="{{ url_for('update_profile_section', section='certifications', item_id=item.id) }}" method="post">
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                   <div class="grid-compact">
-                    <input name="diploma" value="{{ item.diploma }}" placeholder="Intitulé">
-                    <input name="institution" value="{{ item.institution }}" placeholder="Organisme">
-                    <input name="date_obtained" value="{{ item.date_obtained }}" placeholder="Date">
+                    <div>
+                      <input name="diploma" value="{{ item.diploma }}" placeholder="Intitulé">
+                      {{ usage_hint(usage) }}
+                    </div>
+                    <div>
+                      <input name="institution" value="{{ item.institution }}" placeholder="Organisme">
+                      {{ usage_hint(usage) }}
+                    </div>
+                    <div>
+                      <input name="date_obtained" value="{{ item.date_obtained }}" placeholder="Date">
+                      {{ usage_hint(usage) }}
+                    </div>
                   </div>
                   <div class="actions">
                     <button type="submit">Enregistrer</button>
                   </div>
                 </form>
-                <form class="actions" action="{{ url_for('delete_profile_section', section='certifications', item_id=item.id) }}" method="post">
+                <form class="actions" action="{{ url_for('delete_profile_section', section='certifications', item_id=item.id) }}" method="post" {{ delete_warning_attrs(usage, "Cette certification") }}>
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  {{ delete_warning(usage) }}
                   <button type="submit" class="danger">Supprimer</button>
                 </form>
               </article>
@@ -617,6 +349,7 @@
           </div>
           <div class="item-list" data-draggable-list data-reorder-url="{{ url_for('reorder_profile_section', section='skills') }}">
             {% for item in skills %}
+              {% set usage = item_usage.skills.get(item.id, []) %}
               <article class="item-card draggable-item" data-item-id="{{ item.id }}">
                 <div class="item-head">
                   <h3>{{ item.label or "Compétence" }}</h3>
@@ -625,15 +358,22 @@
                 <form action="{{ url_for('update_profile_section', section='skills', item_id=item.id) }}" method="post">
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                   <div class="grid-compact">
-                    <input name="label" value="{{ item.label }}" placeholder="Libellé">
-                    <input name="category" value="{{ item.category }}" placeholder="Catégorie">
+                    <div>
+                      <input name="label" value="{{ item.label }}" placeholder="Libellé">
+                      {{ usage_hint(usage) }}
+                    </div>
+                    <div>
+                      <input name="category" value="{{ item.category }}" placeholder="Catégorie">
+                      {{ usage_hint(usage) }}
+                    </div>
                   </div>
                   <div class="actions">
                     <button type="submit">Enregistrer</button>
                   </div>
                 </form>
-                <form class="actions" action="{{ url_for('delete_profile_section', section='skills', item_id=item.id) }}" method="post">
+                <form class="actions" action="{{ url_for('delete_profile_section', section='skills', item_id=item.id) }}" method="post" {{ delete_warning_attrs(usage, "Cette compétence") }}>
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  {{ delete_warning(usage) }}
                   <button type="submit" class="danger">Supprimer</button>
                 </form>
               </article>
@@ -668,6 +408,7 @@
           </div>
           <div class="item-list" data-draggable-list data-reorder-url="{{ url_for('reorder_profile_section', section='languages') }}">
             {% for item in languages %}
+              {% set usage = item_usage.languages.get(item.id, []) %}
               <article class="item-card draggable-item" data-item-id="{{ item.id }}">
                 <div class="item-head">
                   <h3>{{ item.language or "Langue" }}</h3>
@@ -676,15 +417,22 @@
                 <form action="{{ url_for('update_profile_section', section='languages', item_id=item.id) }}" method="post">
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                   <div class="grid-compact">
-                    <input name="language" value="{{ item.language }}" placeholder="Langue">
-                    <input name="level" value="{{ item.level }}" placeholder="Niveau">
+                    <div>
+                      <input name="language" value="{{ item.language }}" placeholder="Langue">
+                      {{ usage_hint(usage) }}
+                    </div>
+                    <div>
+                      <input name="level" value="{{ item.level }}" placeholder="Niveau">
+                      {{ usage_hint(usage) }}
+                    </div>
                   </div>
                   <div class="actions">
                     <button type="submit">Enregistrer</button>
                   </div>
                 </form>
-                <form class="actions" action="{{ url_for('delete_profile_section', section='languages', item_id=item.id) }}" method="post">
+                <form class="actions" action="{{ url_for('delete_profile_section', section='languages', item_id=item.id) }}" method="post" {{ delete_warning_attrs(usage, "Cette langue") }}>
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  {{ delete_warning(usage) }}
                   <button type="submit" class="danger">Supprimer</button>
                 </form>
               </article>
@@ -719,6 +467,7 @@
           </div>
           <div class="item-list" data-draggable-list data-reorder-url="{{ url_for('reorder_profile_section', section='digital_categories') }}">
             {% for item in digital_categories %}
+              {% set usage = item_usage.digital_categories.get(item.id, []) %}
               <article class="item-card draggable-item" data-item-id="{{ item.id }}">
                 <div class="item-head">
                   <h3>{{ item.label or "Catégorie numérique" }}</h3>
@@ -727,15 +476,22 @@
                 <form action="{{ url_for('update_digital_category', category_id=item.id) }}" method="post">
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                   <div class="grid">
-                    <input name="label" value="{{ item.label }}" placeholder="Catégorie">
-                    <textarea class="full" name="skills_text" placeholder="Compétences">{{ item.skills_text }}</textarea>
+                    <div>
+                      <input name="label" value="{{ item.label }}" placeholder="Catégorie">
+                      {{ usage_hint(usage) }}
+                    </div>
+                    <div class="full">
+                      <textarea name="skills_text" placeholder="Compétences">{{ item.skills_text }}</textarea>
+                      {{ usage_hint(usage) }}
+                    </div>
                   </div>
                   <div class="actions">
                     <button type="submit">Enregistrer</button>
                   </div>
                 </form>
-                <form class="actions" action="{{ url_for('delete_digital_category', category_id=item.id) }}" method="post">
+                <form class="actions" action="{{ url_for('delete_digital_category', category_id=item.id) }}" method="post" {{ delete_warning_attrs(usage, "Cette catégorie numérique") }}>
                   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  {{ delete_warning(usage) }}
                   <button type="submit" class="danger">Supprimer</button>
                 </form>
               </article>
@@ -762,12 +518,21 @@
         </div>
       </section>
     </main>
-
+{% endblock %}
+{% block scripts %}
     <script>
       const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       const tabButtons = Array.from(document.querySelectorAll("[data-tab-target]"));
       const tabPanels = Array.from(document.querySelectorAll("[data-tab-panel]"));
       const tabIds = tabButtons.map((button) => button.dataset.tabTarget);
+
+      document.querySelectorAll("[data-delete-warning]").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+          if (!window.confirm(form.dataset.deleteWarning)) {
+            event.preventDefault();
+          }
+        });
+      });
 
       function activateTab(tabId, persist = true) {
         const selectedTab = tabIds.includes(tabId) ? tabId : "personal";
@@ -893,5 +658,5 @@
         draggedItem = null;
       });
     </script>
-  </body>
-</html>
+
+  {% endblock %}

@@ -1,9 +1,17 @@
 # Generated files
 build/
 instance/
-cahier_des_charges.md
+*.sqlite
+*.sqlite3
+*.db
 uploads/
+exports/
+latex/
+.DS_Store
 *.code-workspace
+database/*.sqlite
+database/*.sqlite3
+database/*.db
 
 # LaTeX build files
 *.aux

@@ -1,244 +1,7 @@
-<!doctype html>
-<html lang="fr">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ page_title }}</title>
-    <style>
-      :root {
-        color-scheme: light;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #1f2933;
-        background: #f5f7fa;
-      }
-
-      body {
-        margin: 0;
-        min-height: 100vh;
-      }
-
-      main {
-        width: min(1120px, calc(100vw - 32px));
-        margin: 32px auto;
-      }
-
-      header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 20px;
-      }
-
-      h1,
-      h2,
-      h3 {
-        margin: 0;
-        line-height: 1.2;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      h2 {
-        font-size: 18px;
-        margin-bottom: 16px;
-      }
-
-      h3 {
-        font-size: 15px;
-        margin-bottom: 12px;
-      }
-
-      a {
-        color: #1f2933;
-        font-weight: 700;
-        text-decoration: none;
-      }
-
-      .nav {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-
-      .nav-link {
-        border-radius: 6px;
-        padding: 9px 10px;
-      }
-
-      .nav-link.active {
-        background: #e5e7eb;
-      }
-
-      .nav form {
-        margin: 0;
-      }
-
-      .nav button {
-        min-height: 38px;
-        width: auto;
-        padding: 0 14px;
-      }
-
-      .panel {
-        background: #ffffff;
-        border: 1px solid #d9e2ec;
-        border-radius: 8px;
-        padding: 24px;
-        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
-        margin-bottom: 18px;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-      }
-
-      .full {
-        grid-column: 1 / -1;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 13px;
-        font-weight: 650;
-      }
-
-      input,
-      textarea,
-      button {
-        width: 100%;
-        border-radius: 6px;
-        font: inherit;
-        box-sizing: border-box;
-      }
-
-      input,
-      textarea {
-        border: 1px solid #bcccdc;
-        background: #ffffff;
-        color: #1f2933;
-        padding: 10px 12px;
-      }
-
-      textarea {
-        min-height: 130px;
-        resize: vertical;
-      }
-
-      button {
-        min-height: 42px;
-        border: 0;
-        background: #1f2933;
-        color: #ffffff;
-        font-weight: 700;
-        cursor: pointer;
-      }
-
-      button:hover {
-        background: #323f4b;
-      }
-
-      .secondary {
-        background: #e5e7eb;
-        color: #1f2933;
-      }
-
-      .secondary:hover {
-        background: #d1d5db;
-      }
-
-      .selection-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
-      }
-
-      .choice {
-        display: grid;
-        grid-template-columns: 22px 1fr;
-        gap: 10px;
-        align-items: start;
-        padding: 10px 0;
-        border-top: 1px solid #e5e7eb;
-      }
-
-      .choice input {
-        width: auto;
-        margin-top: 3px;
-      }
-
-      .choice-title {
-        font-weight: 700;
-      }
-
-      .choice-meta,
-      .empty {
-        color: #52606d;
-        font-size: 13px;
-        line-height: 1.4;
-      }
-
-      .error {
-        margin-bottom: 18px;
-        padding: 12px;
-        border-radius: 6px;
-        background: #fff1f2;
-        color: #9f1239;
-        font-size: 14px;
-      }
-
-      .actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 16px;
-      }
-
-      .actions a,
-      .actions button {
-        width: auto;
-        min-width: 160px;
-        padding: 0 16px;
-      }
-
-      .actions a {
-        display: inline-grid;
-        place-items: center;
-        min-height: 42px;
-        border-radius: 6px;
-        background: #e5e7eb;
-      }
-
-      @media (max-width: 840px) {
-        .grid,
-        .selection-grid {
-          grid-template-columns: 1fr;
-        }
-
-        header,
-        .nav,
-        .actions {
-          align-items: stretch;
-          flex-direction: column;
-        }
-
-        .actions a,
-        .actions button {
-          width: 100%;
-        }
-      }
-    </style>
-  </head>
-  <body>
+  {% extends "base.html" %}
+  {% block content %}
     <main>
-      <header>
-        <h1>{{ page_title }}</h1>
         {% include "_nav.html" %}
-      </header>
 
       {% if error %}
         <div class="error">{{ error }}</div>
@@ -257,7 +20,14 @@
             </div>
             <div>
               <label for="template_name">Modèle</label>
-              <input id="template_name" name="template_name" value="{{ form.get('template_name', 'modern-cv') }}">
+              {% set selected_canvas = form.get('template_name', default_canvas_name) %}
+              <select id="template_name" name="template_name">
+                {% for canvas in available_canvases %}
+                  <option value="{{ canvas.name }}" {% if selected_canvas == canvas.name %}selected{% endif %}>
+                    {{ canvas.label }}
+                  </option>
+                {% endfor %}
+              </select>
             </div>
             <div class="full">
               <label for="about">Description</label>
@@ -367,5 +137,4 @@
         </div>
       </form>
     </main>
-  </body>
-</html>
+{% endblock %}

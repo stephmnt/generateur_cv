@@ -1,9 +1,16 @@
-<nav class="nav" aria-label="Navigation principale">
-  <a class="nav-link {% if active_page == 'cvs' %}active{% endif %}" href="{{ url_for('list_cvs') }}">Liste des CV</a>
-  <a class="nav-link {% if active_page == 'new_cv' %}active{% endif %}" href="{{ url_for('new_cv') }}">Créer un CV</a>
-  <a class="nav-link {% if active_page == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">Profil</a>
-  <form action="{{ url_for('logout') }}" method="post">
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="secondary">Déconnexion</button>
-  </form>
-</nav>
+<header>
+  <div class="brand">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo CV" class="header-icon">
+    <h1>Générateur de CV</h1>
+  </div>
+
+  <nav class="nav" aria-label="Navigation principale">
+    <a class="nav-link {% if active_page == 'cvs' %}active{% endif %}" href="{{ url_for('list_cvs') }}">Liste des CV</a>
+    <a class="nav-link {% if active_page == 'new_cv' %}active{% endif %}" href="{{ url_for('new_cv') }}">Créer un CV</a>
+    <a class="nav-link {% if active_page == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">Profil</a>
+    <form action="{{ url_for('logout') }}" method="post">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="secondary">Déconnexion</button>
+    </form>
+  </nav>
+</header>

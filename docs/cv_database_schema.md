@@ -1,84 +1,40 @@
-# CV Database Schema (from `configs/*.yaml`)
+# Schéma de base de données
 
-Mapping used from YAML:
-- `main.experiences.entries` -> `EXPERIENCE`
-- `sidebar.formations.entries` -> `FORMATION`
-- `sidebar.certifications.entries` -> `CERTIFICATION`
-- `sidebar.skills.items` (+ optional normalized skills from `main.digital.categories`) -> `COMPETENCE`
+L'application utilise SQLite. Au premier lancement, `main.py` crée la base locale dans `instance/app.sqlite3` à partir de `database/schema.sql`.
 
-```mermaid
-erDiagram
-    CV ||--o{ EXPERIENCE : contains
-    CV ||--o{ FORMATION : contains
-    CV ||--o{ CERTIFICATION : contains
-    CV ||--o{ COMPETENCE : defines
+## Tables principales
 
-    EXPERIENCE ||--o{ EXPERIENCE_COMPETENCE : links
-    COMPETENCE ||--o{ EXPERIENCE_COMPETENCE : links
+- `users` : comptes applicatifs, avec email, mot de passe hashé, rôle et statut actif.
+- `profiles` : informations personnelles du profil unique d'un utilisateur.
+- `cvs` : CV créés depuis un profil, avec titre professionnel, description, canvas choisi, chemin du PDF généré et date de génération.
 
-    FORMATION ||--o{ FORMATION_COMPETENCE : links
-    COMPETENCE ||--o{ FORMATION_COMPETENCE : links
+## Données du profil
 
-    CERTIFICATION ||--o{ CERTIFICATION_COMPETENCE : links
-    COMPETENCE ||--o{ CERTIFICATION_COMPETENCE : links
+- `experiences` : expériences professionnelles.
+- `educations` : formations.
+- `certifications` : certifications.
+- `skills` : compétences générales.
+- `languages` : langues.
+- `digital_categories` : catégories numériques.
+- `digital_skills` : compétences numériques associées à une catégorie.
 
-    CV {
-      int cv_id PK
-      string full_name
-      string title
-      string source_file
-    }
+Les expériences, formations et certifications sont ordonnées par dates dans l'application. Les compétences, langues et catégories numériques utilisent `sort_order`, manipulé par drag and drop dans la page Profil.
 
-    EXPERIENCE {
-      int experience_id PK
-      int cv_id FK
-      string role
-      string organization
-      text description
-      string dates_raw
-      int sort_order
-    }
+## Association entre CV et profil
 
-    FORMATION {
-      int formation_id PK
-      int cv_id FK
-      string diploma
-      string institution
-      string dates_raw
-      int sort_order
-    }
+Chaque CV référence les éléments du profil à afficher via des tables de jointure :
 
-    CERTIFICATION {
-      int certification_id PK
-      int cv_id FK
-      string diploma
-      string institution
-      string dates_raw
-      int sort_order
-    }
+- `cv_experiences`
+- `cv_educations`
+- `cv_certifications`
+- `cv_skills`
+- `cv_languages`
+- `cv_digital_categories`
 
-    COMPETENCE {
-      int competence_id PK
-      int cv_id FK
-      string label
-      string source_section
-    }
+Ces tables permettent de créer plusieurs CV ciblés à partir du même profil, sans dupliquer les données sources.
 
-    EXPERIENCE_COMPETENCE {
-      int experience_id PK, FK
-      int competence_id PK, FK
-      string relevance_level
-    }
+## Génération
 
-    FORMATION_COMPETENCE {
-      int formation_id PK, FK
-      int competence_id PK, FK
-      string relation_type
-    }
+- `cv_generations` : historique des tentatives de génération PDF, avec statut, chemin de sortie ou message d'erreur.
 
-    CERTIFICATION_COMPETENCE {
-      int certification_id PK, FK
-      int competence_id PK, FK
-      string relation_type
-    }
-```
+Le PDF final est généré depuis les données SQLite, puis stocké dans `build/generated/`. Les fichiers de build, les uploads et la base locale sont ignorés par Git.

@@ -1,28 +1,34 @@
 # Gestionnaire de CV
 
-Application Flask pour gérer un profil, créer des CV ciblés et générer un PDF depuis les données enregistrées en base.
+![logo](/assets/logo.png)
 
-## Organisation
+Application Flask permettant de gérer un profil, de créer des CV et de générer des PDF à partir des données enregistrées en base.
+
+L’application repose sur un profil centralisé qui regroupe toutes les informations du candidat : expériences, formations, compétences, langues, certifications et informations personnelles.
+
+À partir de ce profil unique, il est possible de créer plusieurs CV ciblés. Lors de la création d’un CV, l’utilisateur sélectionne uniquement les données du profil qu’il souhaite afficher. Un même profil peut donc servir à générer différents CV, adaptés à des postes, secteurs ou candidatures spécifiques.
+
+## Organisation du projet
 
 - `main.py` : application web Flask.
-- `scripts/` : scripts de génération, dont `build_cv.py` et les paramètres par défaut du template.
-- `latex/` : gabarit LaTeX.
-- `assets/` : images utilisées par le CV.
-- `database/` : schéma SQLite local.
-- `uploads/` : photos de profil envoyées depuis l’interface.
-- `build/` : sorties générées localement.
-- `exports/` : PDF exportés à conserver.
-- `references/` : documents sources ou références.
+- `scripts/` : scripts de génération, dont `build_cv.py`, ainsi que le registre des canvas disponibles.
+- `canvases/` : modèles LaTeX. Chaque sous-dossier correspond à un canvas de CV.
+- `assets/` : images utilisées dans les CV.
+- `database/` : schéma SQLite versionné.
+- `uploads/` : photos de profil envoyées depuis l’interface, ignorées par Git.
+- `build/` : fichiers générés localement, ignorés par Git.
 - `docs/` : documentation technique.
 
-## Lancer l’application
+## Lancement de l’application
+
+Installer les dépendances, puis lancer l’application :
 
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
 
-Ouvre ensuite `http://127.0.0.1:5000`, connecte-toi, crée un CV depuis les éléments du profil, puis génère et télécharge le PDF depuis la liste des CV.
+Ouvrir ensuite `http://127.0.0.1:5000`, se connecter, créer un CV à partir des éléments du profil, puis générer et télécharger le PDF depuis la liste des CV.
 
 La page `Profil` permet de gérer les données structurées prévues par le cahier des charges :
 
@@ -44,32 +50,48 @@ Au premier lancement, l’application crée une base SQLite locale dans `instanc
 Ces valeurs peuvent être remplacées avant le premier lancement :
 
 ```bash
-export CV_APP_DEFAULT_EMAIL="ton-email@example.com"
-export CV_APP_DEFAULT_PASSWORD="un-mot-de-passe"
-export FLASK_SECRET_KEY="une-cle-secrete"
+export CV_APP_DEFAULT_EMAIL="email@example.com"
+export CV_APP_DEFAULT_PASSWORD="mot-de-passe"
+export FLASK_SECRET_KEY="cle-secrete"
 python main.py
 ```
 
-## Génération
+## Génération PDF
 
-La génération PDF complète est prise en charge par l’application Flask à partir des données SQLite. Les paramètres du template `modern-cv` sont centralisés dans `scripts/build_cv.py`, et les fichiers YAML de profil ne sont plus utilisés par l’application.
+La génération PDF complète est prise en charge par l’application Flask à partir des données SQLite. Le canvas par défaut est `modern-cv`. Il est déclaré dans `scripts/build_cv.py` et stocké dans `canvases/modern-cv/`.
 
 Pour tester rapidement le template sans lancer Flask :
 
 ```bash
-python3 scripts/build_cv.py --compile-pdf --pdf-output build/cv.local.pdf
+python3 scripts/build_cv.py --canvas modern-cv --compile-pdf --pdf-output build/cv.local.pdf
 ```
 
-Le script compile dans `build/local-build/` en copiant automatiquement le gabarit LaTeX et les assets nécessaires.
+Le script compile le projet dans `build/local-build/` en copiant automatiquement le canvas choisi et les assets nécessaires.
 
-## Améliorations restantes
+## Ajout d’un canvas
 
-- Nettoyer les builds précédents à la génération d'un nouveau build pour ne pas faire exploser le stockage.
-- Ajouter le petit logo de cv.
-- Discrètement sous chaque champ de la page profil, préciser quel cv utilise ce champ.
-- Warning en cas de supression d'un champ utilisé par un cv.
-- Sécuriser les formulaires : champ date pour les dates.
-- Problème de décalage entre la section "à propos" et les informations personnelles.
+1. Créer un dossier dans `canvases/`, par exemple `canvases/mon-canvas/`.
+2. Ajouter au minimum un fichier racine LaTeX, généralement `main.tex`.
+3. Déclarer le canvas dans `CANVAS_CONFIGS`, dans `scripts/build_cv.py`, avec son nom, son libellé, son dossier, son fichier racine et ses valeurs par défaut.
+4. Le modèle apparaît ensuite dans la liste déroulante de la page `Créer un CV`.
+
+La documentation du canvas existant se trouve dans `canvases/modern-cv/README.md`.
+
+## Travail local sur les canvas
+
+Pour générer uniquement le fichier `.tex` :
+
+```bash
+python3 scripts/build_cv.py --canvas modern-cv --output build/cv.generated.tex
+```
+
+Pour générer et compiler le PDF en une seule commande :
+
+```bash
+python3 scripts/build_cv.py --canvas modern-cv --compile-pdf --pdf-output build/cv.local.pdf
+```
+
+Pour itérer rapidement sur la mise en page, modifier `canvases/modern-cv/main.tex` ou les paramètres du canvas dans `scripts/build_cv.py`, puis relancer la commande de compilation locale.
 
 ## Références
 

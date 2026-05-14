@@ -35,15 +35,15 @@
 % --- Data defaults (overridden by cv.generated.tex) ---
 \newcommand{\CVSidebarWidthValue}{0.367\paperwidth}
 \newcommand{\CVPadValue}{12mm}
-\newcommand{\CVMainGapValue}{20mm}
+\newcommand{\CVMainGapValue}{24mm}
 \newcommand{\CVContentTopOffset}{56mm}
-\newcommand{\CVContactBlockTopShift}{-16mm}
+\newcommand{\CVContactBlockTopShift}{0mm}
 
 \newcommand{\CVHeaderBarLeftOverlap}{48mm}
 \newcommand{\CVHeaderBarTopShift}{-10mm}
 \newcommand{\CVHeaderBarBottomShift}{-48mm}
 
-\newcommand{\CVPhotoPath}{photo.jpg}
+\newcommand{\CVPhotoPath}{cv.png}
 \newcommand{\CVPhotoWidth}{48mm}
 \newcommand{\CVPhotoRadius}{23mm}
 \newcommand{\CVPhotoXFromPad}{27mm}
@@ -185,7 +185,7 @@
 \setlength{\parskip}{0pt}
 
 \newcommand{\sideheading}[1]{%
-  \vspace{5mm}%
+  \vspace{10mm}%
   {\color{TextDark}\bfseries\large\MakeUppercase{#1}}\par
   \vspace{2mm}%
 }
@@ -247,13 +247,12 @@
 \fi
 
 % --- Two-column content area (flowing across pages) ---
-% Keep equal inner margins (=\Pad) on both sides of each zone:
-% sidebar right margin and main-column left margin.
+% Keep a configurable gap between the sidebar and the main column.
 % In paracol, width specs are computed against \textwidth, so we set
 % margins in geometry and avoid wrapping paracol in adjustwidth.
 \setcolumnwidth{%
-  \dimexpr\SidebarW-2\Pad\relax/\dimexpr2\Pad\relax,
-  \dimexpr\paperwidth-\SidebarW-2\Pad\relax/0pt%
+  \dimexpr\SidebarW-2\Pad\relax/\MainGap,
+  \dimexpr\paperwidth-\SidebarW-\MainGap\relax/0pt%
 }
 \begin{paracol}{2}
   % ===== SIDEBAR =====

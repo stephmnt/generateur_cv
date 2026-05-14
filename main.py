@@ -17,10 +17,17 @@ from flask import Flask, jsonify, redirect, render_template, request, send_file,
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
-from scripts.build_cv import build_document, default_cv_data
+from scripts.build_cv import (
+    DEFAULT_CANVAS_NAME,
+    available_canvases,
+    build_document,
+    canvas_source_dir,
+    canvas_tex_root,
+    default_cv_data,
+    normalize_canvas_name,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-LATEX_DIR = PROJECT_ROOT / "latex"
 ASSETS_DIR = PROJECT_ROOT / "assets"
 BUILD_DIR = PROJECT_ROOT / "build"
 GENERATED_PDF_DIR = BUILD_DIR / "generated"
@@ -30,7 +37,7 @@ DATABASE_PATH = DATABASE_DIR / "app.sqlite3"
 SCHEMA_PATH = PROJECT_ROOT / "database" / "schema.sql"
 BUILD_RUN_ID_LENGTH = 12
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="assets", static_url_path="/assets")
 app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key-change-me")
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
@@ -211,7 +218,11 @@ def validate_csrf_token() -> bool:
 
 @app.context_processor
 def inject_csrf_token():
-    return {"csrf_token": get_csrf_token}
+    return {
+        "csrf_token": get_csrf_token,
+        "available_canvases": available_canvases(),
+        "default_canvas_name": DEFAULT_CANVAS_NAME,
+    }
 
 
 def clean_text(value: Any) -> str:
@@ -236,6 +247,17 @@ def form_int(name: str, default: int = 0) -> int:
         return int(value)
     except ValueError:
         return default
+
+
+def resolve_canvas_name(value: str | None) -> str:
+    try:
+        return normalize_canvas_name(value or DEFAULT_CANVAS_NAME)
+    except ValueError:
+        return DEFAULT_CANVAS_NAME
+
+
+def form_template_name() -> str:
+    return resolve_canvas_name(form_text("template_name"))
 
 
 def allowed_photo(filename: str) -> bool:
@@ -278,7 +300,7 @@ def insert_record(connection: sqlite3.Connection, table: str, values: dict[str, 
         f"INSERT INTO {table} ({columns}) VALUES ({placeholders})",
         tuple(values.values()),
     )
-    return int(cursor.lastrowid)
+    return int(cursor.lastrowid or 0)
 
 
 def default_profile_payload(user_id: int, user_email: str) -> dict[str, Any]:
@@ -351,12 +373,81 @@ def digital_categories(connection: sqlite3.Connection, profile_id: int) -> list[
     return categories
 
 
+def cv_usage_name(row: sqlite3.Row | dict[str, Any]) -> str:
+    title = clean_text(row["title"])
+    return title or f"CV #{row['id']}"
+
+
+def profile_cv_usage(connection: sqlite3.Connection, profile_id: int) -> list[str]:
+    rows = connection.execute(
+        """
+        SELECT id, title
+        FROM cvs
+        WHERE profile_id = ?
+        ORDER BY updated_at DESC, id DESC
+        """,
+        (profile_id,),
+    ).fetchall()
+    return [cv_usage_name(row) for row in rows]
+
+
+def profile_field_usage(profile: dict[str, Any], cv_names: list[str]) -> dict[str, list[str]]:
+    used_fields = {
+        "first_name",
+        "last_name",
+        "photo_path",
+        "website",
+        "linkedin",
+        "github",
+        "phone",
+        "email",
+        "address_line_1",
+        "address_line_2",
+        "postal_code",
+        "city",
+    }
+    usage: dict[str, list[str]] = {}
+
+    for field in PROFILE_FIELDS + ["photo_path"]:
+        usage[field] = cv_names if field in used_fields and clean_text(profile.get(field)) else []
+
+    return usage
+
+
+def selected_item_usage(connection: sqlite3.Connection, profile_id: int) -> dict[str, dict[int, list[str]]]:
+    usage: dict[str, dict[int, list[str]]] = {
+        section: {}
+        for section in CV_SELECTION_CONFIG
+    }
+
+    for section, config in CV_SELECTION_CONFIG.items():
+        rows = connection.execute(
+            f"""
+            SELECT selected.{config['join_column']} AS item_id, c.id, c.title
+            FROM {config['join_table']} AS selected
+            JOIN cvs AS c ON c.id = selected.cv_id
+            WHERE c.profile_id = ?
+            ORDER BY c.updated_at DESC, c.id DESC
+            """,
+            (profile_id,),
+        ).fetchall()
+
+        for row in rows:
+            item_id = int(row["item_id"])
+            usage[section].setdefault(item_id, []).append(cv_usage_name(row))
+
+    return usage
+
+
 def load_profile_data(user_id: int) -> dict[str, Any]:
     profile = get_or_create_profile(user_id)
     profile_id = int(profile["id"])
     with get_db() as connection:
+        cv_names = profile_cv_usage(connection, profile_id)
         return {
             "profile": profile,
+            "profile_usage": profile_field_usage(profile, cv_names),
+            "item_usage": selected_item_usage(connection, profile_id),
             "experiences": date_section_rows(connection, "experiences", profile_id),
             "educations": date_section_rows(connection, "educations", profile_id),
             "certifications": date_section_rows(connection, "certifications", profile_id),
@@ -471,7 +562,7 @@ def replace_cv_selections(
 def create_cv_for_profile(user_id: int, profile_id: int) -> int:
     title = form_text("title")
     about = form_text("about")
-    template_name = form_text("template_name") or "modern-cv"
+    template_name = form_template_name()
     selections = {
         section: selected_ids(section)
         for section in CV_SELECTION_CONFIG
@@ -497,7 +588,7 @@ def create_cv_for_profile(user_id: int, profile_id: int) -> int:
 def update_cv_for_profile(user_id: int, cv_id: int, profile_id: int) -> bool:
     title = form_text("title")
     about = form_text("about")
-    template_name = form_text("template_name") or "modern-cv"
+    template_name = form_template_name()
     selections = {
         section: selected_ids(section)
         for section in CV_SELECTION_CONFIG
@@ -720,8 +811,6 @@ def paragraph_list(text: str) -> list[str]:
 
 
 def cv_data_from_database(cv_id: int, user_id: int) -> dict[str, Any]:
-    data = default_cv_data()
-
     with get_db() as connection:
         cv = connection.execute(
             """
@@ -761,6 +850,10 @@ def cv_data_from_database(cv_id: int, user_id: int) -> dict[str, Any]:
         skills = cv_selected_rows(connection, cv_id, "skills")
         languages = cv_selected_rows(connection, cv_id, "languages")
         digital = cv_digital_categories(connection, cv_id)
+
+    template_name = resolve_canvas_name(clean_text(cv_data.get("template_name")))
+    data = default_cv_data(template_name)
+    data["_canvas_name"] = template_name
 
     header = data.setdefault("header", {})
     header["name"] = profile_display_name(cv_data)
@@ -853,14 +946,22 @@ def cv_data_from_database(cv_id: int, user_id: int) -> dict[str, Any]:
     return data
 
 
-def copy_build_inputs(work_dir: Path) -> None:
-    for path in LATEX_DIR.iterdir():
-        if path.is_file():
-            shutil.copy2(path, work_dir / path.name)
+def copy_source_files(source_dir: Path, work_dir: Path) -> None:
+    if not source_dir.exists():
+        raise FileNotFoundError(f"Dossier source introuvable : {source_dir}")
 
-    for path in ASSETS_DIR.iterdir():
+    for path in source_dir.rglob("*"):
         if path.is_file():
-            shutil.copy2(path, work_dir / path.name)
+            destination = work_dir / path.relative_to(source_dir)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, destination)
+
+
+def copy_build_inputs(work_dir: Path, template_name: str) -> None:
+    copy_source_files(canvas_source_dir(template_name), work_dir)
+
+    if ASSETS_DIR.exists():
+        copy_source_files(ASSETS_DIR, work_dir)
 
 
 def copy_photo_input(work_dir: Path, photo_path: str) -> None:
@@ -900,19 +1001,20 @@ def run_command(command: list[str], cwd: Path, env: dict[str, str] | None = None
         raise RuntimeError(output.strip() or f"Commande échouée : {' '.join(command)}")
 
 
-def compile_latex_pdf(work_dir: Path) -> Path:
+def compile_latex_pdf(work_dir: Path, template_name: str) -> Path:
     if not shutil.which("lualatex"):
         raise RuntimeError("lualatex est introuvable. Installe une distribution TeX pour compiler le PDF.")
 
     env = os.environ.copy()
     env["TEXMFVAR"] = str(work_dir / "texmf-var")
+    tex_root = canvas_tex_root(template_name)
     run_command(
-        ["lualatex", "-interaction=nonstopmode", "-halt-on-error", "main.tex"],
+        ["lualatex", "-interaction=nonstopmode", "-halt-on-error", tex_root],
         cwd=work_dir,
         env=env,
     )
 
-    pdf_path = work_dir / "main.pdf"
+    pdf_path = work_dir / f"{Path(tex_root).stem}.pdf"
     if not pdf_path.exists():
         raise RuntimeError("La compilation LaTeX n’a pas produit de PDF.")
 
@@ -957,22 +1059,28 @@ def cleanup_previous_build_artifacts(cv_id: int, keep_pdf: Path) -> None:
     cleanup_previous_generated_pdfs(cv_id, keep_pdf)
 
 
-def generate_pdf_from_data(data: dict[str, Any], source_label: str, cv_id: int) -> Path:
+def generate_pdf_from_data(
+    data: dict[str, Any],
+    source_label: str,
+    cv_id: int,
+    template_name: str | None = None,
+) -> Path:
+    canvas_name = resolve_canvas_name(template_name or clean_text(data.get("_canvas_name")))
     run_id = uuid.uuid4().hex[:12]
     work_dir = BUILD_DIR / run_id
     work_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        copy_build_inputs(work_dir)
+        copy_build_inputs(work_dir, canvas_name)
         copy_photo_input(work_dir, clean_text(data.get("photo", {}).get("path", "")))
 
         generated_tex = work_dir / "cv.generated.tex"
         generated_tex.write_text(
-            build_document(data, source_file=source_label),
+            build_document(data, source_file=source_label, canvas_name=canvas_name),
             encoding="utf-8",
         )
 
-        compiled_pdf = compile_latex_pdf(work_dir)
+        compiled_pdf = compile_latex_pdf(work_dir, canvas_name)
 
         GENERATED_PDF_DIR.mkdir(parents=True, exist_ok=True)
         output_pdf = GENERATED_PDF_DIR / f"cv-{cv_id}-{run_id}.pdf"

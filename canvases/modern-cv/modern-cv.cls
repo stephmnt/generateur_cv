@@ -39,7 +39,7 @@
 \setlength{\Pad}{12mm} % padding interne
 
 \newlength{\MainGap}
-\setlength{\MainGap}{20mm} % espace entre sidebar et contenu principal
+\setlength{\MainGap}{24mm} % espace entre sidebar et contenu principal
 
 % --- Header on/off switch ---
 \newif\ifwithheader
@@ -79,7 +79,7 @@
 
         \begin{scope}
           \clip (photoc) circle (\photor);
-          \node at (photoc) {\includegraphics[width=60mm]{photo.jpg}};
+          \node at (photoc) {\includegraphics[width=60mm]{cv.png}};
         \end{scope}
         \draw[white,line width=2.5pt] (photoc) circle (\photor);
 
@@ -149,4 +149,4 @@
   \thispagestyle{empty}
 }
 
-\newcommand{\HeaderSpace}{\ifwithheader\vspace*{66mm}\fi}
+\newcommand{\HeaderSpace}{\ifwithheader\vspace*{56mm}\fi}
