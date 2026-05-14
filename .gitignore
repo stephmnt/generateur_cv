@@ -12,6 +12,7 @@ latex/
 database/*.sqlite
 database/*.sqlite3
 database/*.db
+database/schema.sql
 
 # LaTeX build files
 *.aux
@@ -23,6 +24,8 @@ database/*.db
 *.synctex.gz
 *.xdv
 .texlive-cache/
+.texlive-cache/luatex-cache
+.texlive-cache/luatex-cache/generic
 
 # Python virtual environment
 .venv/
