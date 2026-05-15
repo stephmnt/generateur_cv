@@ -6,7 +6,7 @@
 - `modern-cv.cls` : ancienne classe conservée comme référence, non utilisée par le build principal.
 - `cv.generated.tex` : fichier généré au moment du build dans le dossier temporaire, jamais à modifier à la main.
 
-Le build copie ce dossier dans un répertoire de travail, copie aussi `assets/`, écrit `cv.generated.tex`, puis compile `main.tex` avec `lualatex`.
+Le build copie ce dossier dans un répertoire de travail, copie aussi `templates/assets/`, écrit `cv.generated.tex`, puis compile `main.tex` avec `lualatex`.
 
 ## Paramètres du canvas
 
@@ -28,7 +28,7 @@ Les valeurs par défaut sont dans `MODERN_CV_TEMPLATE`, dans `scripts/build_cv.p
 
 ### `photo`
 
-- `path` : chemin de l'image de profil. `cv.png` est l'image générique par défaut ; les photos envoyées depuis l'interface utilisent `uploads/...`.
+- `path` : chemin de l'image de profil. Une valeur vide masque la photo ; les photos envoyées depuis l'interface utilisent `uploads/...`.
 - `width` : largeur de l'image insérée dans le cercle.
 - `radius` : rayon du masque circulaire.
 - `x_from_pad` : décalage horizontal de la photo depuis la marge interne gauche.

@@ -43,7 +43,7 @@
 \newcommand{\CVHeaderBarTopShift}{-10mm}
 \newcommand{\CVHeaderBarBottomShift}{-48mm}
 
-\newcommand{\CVPhotoPath}{cv.png}
+\newcommand{\CVPhotoPath}{}
 \newcommand{\CVPhotoWidth}{48mm}
 \newcommand{\CVPhotoRadius}{23mm}
 \newcommand{\CVPhotoXFromPad}{27mm}
@@ -158,15 +158,18 @@
         \coordinate (barverticalcenter) at ($(barleft)!0.5!(barright)$);
         \coordinate (barcenter) at (whitecenter |- barverticalcenter);
 
-        % Photo (plus grande, à cheval)
-        \coordinate (photoc) at ([xshift=\dimexpr\Pad+\CVPhotoXFromPad\relax,yshift=\CVPhotoYShift]current page.north west);
-        \def\photor{\CVPhotoRadius}
+        \ifx\CVPhotoPath\empty
+        \else
+          % Photo (plus grande, à cheval)
+          \coordinate (photoc) at ([xshift=\dimexpr\Pad+\CVPhotoXFromPad\relax,yshift=\CVPhotoYShift]current page.north west);
+          \def\photor{\CVPhotoRadius}
 
-        \begin{scope}
-          \clip (photoc) circle (\photor);
-          \node at (photoc) {\includegraphics[width=\CVPhotoWidth]{\CVPhotoPath}};
-        \end{scope}
-        \draw[white,line width=\CVPhotoBorderWidth] (photoc) circle (\photor);
+          \begin{scope}
+            \clip (photoc) circle (\photor);
+            \node at (photoc) {\includegraphics[width=\CVPhotoWidth]{\CVPhotoPath}};
+          \end{scope}
+          \draw[white,line width=\CVPhotoBorderWidth] (photoc) circle (\photor);
+        \fi
 
         % Name + title
 \node[anchor=center, align=center] at (barcenter) {%

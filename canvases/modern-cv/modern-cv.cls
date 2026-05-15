@@ -73,16 +73,6 @@
         \coordinate (barverticalcenter) at ($(barleft)!0.5!(barright)$);
         \coordinate (barcenter) at (whitecenter |- barverticalcenter);
 
-        % Photo (plus grande, à cheval)
-        \coordinate (photoc) at ([xshift=\Pad+27mm,yshift=-31mm]current page.north west);
-        \def\photor{23mm}
-
-        \begin{scope}
-          \clip (photoc) circle (\photor);
-          \node at (photoc) {\includegraphics[width=60mm]{cv.png}};
-        \end{scope}
-        \draw[white,line width=2.5pt] (photoc) circle (\photor);
-
         % Name + title
         \node[anchor=center, align=center] at (barcenter) {%
   {\color{white}\bfseries\fontsize{28}{28}\selectfont

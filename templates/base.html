@@ -239,7 +239,23 @@
         cursor: pointer;
       }
 
+      .button {
+        min-height: 40px;
+        border-radius: 6px;
+        background: #1f2933;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        box-sizing: border-box;
+      }
+
       button:hover {
+        background: #323f4b;
+      }
+
+      .button:hover {
         background: #323f4b;
       }
 
@@ -269,11 +285,13 @@
       }
 
       .actions form,
-      .actions button {
+      .actions button,
+      .actions .button {
         width: auto;
       }
 
-      .actions button {
+      .actions button,
+      .actions .button {
         min-width: 132px;
         padding: 0 14px;
       }
@@ -332,6 +350,36 @@
 
       .checkbox input {
         width: auto;
+      }
+
+      .cv-row {
+        margin: 20px 0;
+      }
+
+      .cv-row .meta,
+      .cv-row .summary,
+      .cv-row .actions {
+        padding: 10px 0;
+      }
+
+      .selection-grid > div {
+        margin-top: 20px;
+      }
+
+      .choice {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .choice input {
+        flex: 0 0 auto;
+        width: auto;
+        margin-top: 2px;
+      }
+
+      .choice > span {
+        min-width: 0;
       }
 
       @media (max-width: 760px) {

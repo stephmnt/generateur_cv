@@ -16,7 +16,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = PROJECT_ROOT / "build"
 CANVASES_DIR = PROJECT_ROOT / "canvases"
-ASSETS_DIR = PROJECT_ROOT / "assets"
+ASSETS_DIR = PROJECT_ROOT / "templates" / "assets"
 
 DEFAULT_CANVAS_NAME = "modern-cv"
 DEFAULT_OUTPUT_TEX = BUILD_DIR / "cv.generated.tex"
@@ -44,7 +44,7 @@ MODERN_CV_TEMPLATE: dict[str, Any] = {
         "name_title_gap": "1.5mm",
     },
     "photo": {
-        "path": "cv.png",
+        "path": "",
         "width": "48mm",
         "radius": "23mm",
         "x_from_pad": "27mm",

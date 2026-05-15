@@ -28,7 +28,7 @@ from scripts.build_cv import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-ASSETS_DIR = PROJECT_ROOT / "assets"
+ASSETS_DIR = PROJECT_ROOT / "templates" / "assets"
 BUILD_DIR = PROJECT_ROOT / "build"
 GENERATED_PDF_DIR = BUILD_DIR / "generated"
 UPLOAD_DIR = PROJECT_ROOT / "uploads"
@@ -37,7 +37,7 @@ DATABASE_PATH = DATABASE_DIR / "app.sqlite3"
 SCHEMA_PATH = PROJECT_ROOT / "database" / "schema.sql"
 BUILD_RUN_ID_LENGTH = 12
 
-app = Flask(__name__, static_folder="assets", static_url_path="/assets")
+app = Flask(__name__, static_folder=str(ASSETS_DIR), static_url_path="/assets")
 app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key-change-me")
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
@@ -178,6 +178,19 @@ def find_active_user_by_email(email: str) -> sqlite3.Row | None:
         ).fetchone()
 
 
+def load_account_user(user_id: int) -> dict[str, Any] | None:
+    with get_db() as connection:
+        row = connection.execute(
+            """
+            SELECT id, email, password_hash, role, is_active
+            FROM users
+            WHERE id = ? AND is_active = 1
+            """,
+            (user_id,),
+        ).fetchone()
+    return dict(row) if row else None
+
+
 def current_user() -> dict[str, Any] | None:
     user_id = session.get("user_id")
     if user_id is None:
@@ -247,6 +260,10 @@ def form_int(name: str, default: int = 0) -> int:
         return int(value)
     except ValueError:
         return default
+
+
+def is_valid_email(value: str) -> bool:
+    return bool(value and "@" in value and "." in value.rsplit("@", 1)[-1])
 
 
 def resolve_canvas_name(value: str | None) -> str:
@@ -729,7 +746,7 @@ def profile_address_lines(profile: dict[str, Any]) -> list[str]:
     return lines
 
 
-def normalize_contact_url(value: str) -> str:
+def normalize_url(value: str) -> str:
     value = clean_text(value)
     if not value:
         return ""
@@ -738,16 +755,37 @@ def normalize_contact_url(value: str) -> str:
     return f"https://{value}"
 
 
+def social_profile_url(value: str, base_url: str) -> str:
+    value = clean_text(value)
+    if not value:
+        return ""
+    if value.startswith(("http://", "https://")):
+        return value
+    return f"{base_url}/{value.lstrip('@/')}"
+
+
 def cv_contact_blocks(profile: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     left: list[dict[str, Any]] = []
     right: list[dict[str, Any]] = []
 
     linkedin = clean_text(profile.get("linkedin"))
     if linkedin:
-        left.append({"icon": "linkedin", "value": linkedin, "url": normalize_contact_url(linkedin)})
+        left.append(
+            {
+                "icon": "linkedin",
+                "value": linkedin,
+                "url": social_profile_url(linkedin, "https://www.linkedin.com/in"),
+            }
+        )
     github = clean_text(profile.get("github"))
     if github:
-        right.append({"icon": "github", "value": github, "url": normalize_contact_url(github)})
+        right.append(
+            {
+                "icon": "github",
+                "value": github,
+                "url": social_profile_url(github, "https://github.com"),
+            }
+        )
     if clean_text(profile.get("email")):
         left.append({"icon": "envelope", "value": clean_text(profile.get("email"))})
     if clean_text(profile.get("phone")):
@@ -755,7 +793,7 @@ def cv_contact_blocks(profile: dict[str, Any]) -> dict[str, list[dict[str, Any]]
 
     website = clean_text(profile.get("website"))
     if website:
-        left.append({"icon": "globe", "value": website, "url": normalize_contact_url(website)})
+        left.append({"icon": "globe", "value": website, "url": normalize_url(website)})
 
     address_lines = profile_address_lines(profile)
     if address_lines:
@@ -1165,6 +1203,132 @@ def index():
 @login_required
 def generate():
     return redirect(url_for("list_cvs"))
+
+
+def render_account_page(
+    user: dict[str, Any],
+    notice: str | None = None,
+    error: str | None = None,
+    account_email: str | None = None,
+    status_code: int = 200,
+):
+    account = load_account_user(int(user["id"]))
+    if account is None:
+        session.clear()
+        return redirect(url_for("login"))
+
+    if account_email is not None:
+        account["email"] = account_email
+
+    return (
+        render_template(
+            "account.html",
+            user=user,
+            account=account,
+            notice=notice,
+            error=error,
+            active_page="account",
+        ),
+        status_code,
+    )
+
+
+@app.get("/account")
+@login_required
+def account():
+    user = current_user()
+    assert user is not None
+    return render_account_page(user)
+
+
+@app.post("/account/email")
+@login_required
+def update_account_email():
+    user = current_user()
+    assert user is not None
+
+    if not validate_csrf_token():
+        return redirect(url_for("account"))
+
+    email = form_text("email").lower()
+    if not is_valid_email(email):
+        return render_account_page(
+            user,
+            error="Saisis une adresse e-mail de connexion valide.",
+            account_email=email,
+            status_code=400,
+        )
+
+    with get_db() as connection:
+        existing = connection.execute(
+            "SELECT id FROM users WHERE lower(email) = lower(?) AND id <> ?",
+            (email, user["id"]),
+        ).fetchone()
+
+        if existing is not None:
+            return render_account_page(
+                user,
+                error="Cette adresse e-mail de connexion est déjà utilisée.",
+                account_email=email,
+                status_code=400,
+            )
+
+        connection.execute(
+            "UPDATE users SET email = ? WHERE id = ?",
+            (email, user["id"]),
+        )
+
+    session["user_email"] = email
+    refreshed_user = current_user() or {**user, "email": email}
+    return render_account_page(refreshed_user, notice="E-mail de connexion enregistré.")
+
+
+@app.post("/account/password")
+@login_required
+def update_account_password():
+    user = current_user()
+    assert user is not None
+
+    if not validate_csrf_token():
+        return redirect(url_for("account"))
+
+    account_user = load_account_user(int(user["id"]))
+    if account_user is None:
+        session.clear()
+        return redirect(url_for("login"))
+
+    current_password = request.form.get("current_password", "")
+    new_password = request.form.get("new_password", "")
+    confirm_password = request.form.get("confirm_password", "")
+
+    if not check_password_hash(account_user["password_hash"], current_password):
+        return render_account_page(
+            user,
+            error="Le mot de passe actuel est incorrect.",
+            status_code=400,
+        )
+
+    if len(new_password) < 8:
+        return render_account_page(
+            user,
+            error="Le nouveau mot de passe doit contenir au moins 8 caractères.",
+            status_code=400,
+        )
+
+    if new_password != confirm_password:
+        return render_account_page(
+            user,
+            error="La confirmation du mot de passe ne correspond pas.",
+            status_code=400,
+        )
+
+    with get_db() as connection:
+        connection.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (generate_password_hash(new_password), user["id"]),
+        )
+
+    return render_account_page(user, notice="Mot de passe modifié.")
 
 
 @app.get("/profile")

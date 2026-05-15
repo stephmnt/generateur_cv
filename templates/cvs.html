@@ -32,7 +32,7 @@
               </div>
             </div>
             <div class="actions">
-              <a class="button secondary" href="{{ url_for('edit_cv', cv_id=cv.id) }}">Modifier</a>
+              <a class="button" href="{{ url_for('edit_cv', cv_id=cv.id) }}">Modifier</a>
               {% if cv.pdf_path %}
                 <a class="button secondary" href="{{ url_for('download_cv', cv_id=cv.id) }}">Télécharger</a>
               {% endif %}

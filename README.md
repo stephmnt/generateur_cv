@@ -1,6 +1,6 @@
 # Gestionnaire de CV
 
-![logo](/assets/logo.png)
+![logo](/templates/assets/logo.png)
 
 Application Flask permettant de gérer un profil, de créer des CV et de générer des PDF à partir des données enregistrées en base.
 
@@ -8,20 +8,52 @@ L’application repose sur un profil centralisé qui regroupe toutes les informa
 
 À partir de ce profil unique, il est possible de créer plusieurs CV ciblés. Lors de la création d’un CV, l’utilisateur sélectionne uniquement les données du profil qu’il souhaite afficher. Un même profil peut donc servir à générer différents CV, adaptés à des postes, secteurs ou candidatures spécifiques.
 
+![logo](/templates/assets/demo.png)
+
 ## Organisation du projet
 
 - `main.py` : application web Flask.
+- `templates/` : gabarits HTML Flask et sous-dossier `templates/assets/` pour les images statiques.
 - `scripts/` : scripts de génération, dont `build_cv.py`, ainsi que le registre des canvas disponibles.
 - `canvases/` : modèles LaTeX. Chaque sous-dossier correspond à un canvas de CV.
-- `assets/` : images utilisées dans les CV.
-- `database/` : schéma SQLite versionné.
+- `database/` : schéma SQLite utilisé pour initialiser la base locale.
 - `uploads/` : photos de profil envoyées depuis l’interface, ignorées par Git.
 - `build/` : fichiers générés localement, ignorés par Git.
-- `docs/` : documentation technique.
+
+## Technologies utilisées
+
+- Flask
+- SQLite
+- Jinja2
+- LaTeX
+- Python
+
+## Prérequis
+
+- Python 3.11+
+- TeX Live ou MiKTeX
+- pip
+
+Exemple Debian/Ubuntu :
+
+```bash
+sudo apt install texlive-full
+```
 
 ## Lancement de l’application
 
 Installer les dépendances, puis lancer l’application :
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Pour windows :
+
+```bash
+.venv\Scripts\activate
+```
 
 ```bash
 pip install -r requirements.txt
@@ -56,6 +88,47 @@ export FLASK_SECRET_KEY="cle-secrete"
 python main.py
 ```
 
+## Schéma de base de données
+
+L'application utilise SQLite. Au premier lancement, `main.py` crée la base locale dans `instance/app.sqlite3` à partir de `database/schema.sql`.
+
+### Tables principales
+
+- `users` : comptes applicatifs, avec email, mot de passe hashé, rôle et statut actif.
+- `profiles` : informations personnelles du profil unique d'un utilisateur.
+- `cvs` : CV créés depuis un profil, avec titre professionnel, description, canvas choisi, chemin du PDF généré et date de génération.
+
+### Données du profil
+
+- `experiences` : expériences professionnelles.
+- `educations` : formations.
+- `certifications` : certifications.
+- `skills` : compétences générales.
+- `languages` : langues.
+- `digital_categories` : catégories numériques.
+- `digital_skills` : compétences numériques associées à une catégorie.
+
+Les expériences, formations et certifications sont ordonnées par dates dans l'application. Les compétences, langues et catégories numériques utilisent `sort_order`, manipulé par drag and drop dans la page Profil.
+
+### Association entre CV et profil
+
+Chaque CV référence les éléments du profil à afficher via des tables de jointure :
+
+- `cv_experiences`
+- `cv_educations`
+- `cv_certifications`
+- `cv_skills`
+- `cv_languages`
+- `cv_digital_categories`
+
+Ces tables permettent de créer plusieurs CV ciblés à partir du même profil, sans dupliquer les données sources.
+
+### Génération
+
+- `cv_generations` : historique des tentatives de génération PDF, avec statut, chemin de sortie ou message d'erreur.
+
+Le PDF final est généré depuis les données SQLite, puis stocké dans `build/generated/`. Les fichiers de build, les uploads et la base locale sont ignorés par Git.
+
 ## Génération PDF
 
 La génération PDF complète est prise en charge par l’application Flask à partir des données SQLite. Le canvas par défaut est `modern-cv`. Il est déclaré dans `scripts/build_cv.py` et stocké dans `canvases/modern-cv/`.
@@ -66,7 +139,7 @@ Pour tester rapidement le template sans lancer Flask :
 python3 scripts/build_cv.py --canvas modern-cv --compile-pdf --pdf-output build/cv.local.pdf
 ```
 
-Le script compile le projet dans `build/local-build/` en copiant automatiquement le canvas choisi et les assets nécessaires.
+Le script compile le projet dans `build/local-build/` en copiant automatiquement le canvas choisi et les images nécessaires depuis `templates/assets/`.
 
 ## Ajout d’un canvas
 
